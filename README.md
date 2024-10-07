@@ -1,9 +1,9 @@
 # Contiki Projects
-
-Principal author: Mark Anthony Cabilo<br>
-Contributors: ~<br>
-Created: April 2019<br>
-Restored: October 2024<br>
+---
+Principal author: Mark Anthony Cabilo
+Contributors: ...
+Created: April 2019
+Restored: October 2024
 ---
 Brief:<br>
 Projects based on Contiki-NG. 
