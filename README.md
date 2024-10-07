@@ -13,9 +13,10 @@ Projects based on Contiki-NG.
 1. Run `install_dependencies.sh` with ```./install_dependencies.sh```
 2. Reboot system.
 3. Run `install_contiki_ng.sh` with ```./install_contiki_ng.sh```
+4. Initiate `main_contiki` submodule.
 
 ---
 **If running WSL**
- When using Windows Subsystem on Linux (WSL2), wireless sensors must be exposed from Windows to WSL. 
- Use the following instructions to do this:
- 1.
+
+---
+**Sample Projects**
