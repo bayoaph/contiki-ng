@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Clone the Contiki-NG repository
-echo "Cloning the Contiki-NG repository..."
-git clone https://github.com/contiki-ng/contiki-ng.git main_contiki
+echo "Cloning the Contiki-NG repository as a submodule..."
+cd ../
+git submodule add https://github.com/contiki-ng/contiki-ng.git main_contiki
 
 # Check if the clone was successful
 if [ $? -eq 0 ]; then
@@ -13,7 +14,7 @@ else
 fi
 
 # Change to the Contiki-NG directory
-cd contiki-ng || { echo "Failed to enter the contiki-ng directory."; exit 1; }
+cd main_contiki || { echo "Failed to enter the main contiki-ng directory."; exit 1; }
 
 # Initialize and update submodules
 echo "Updating submodules..."
