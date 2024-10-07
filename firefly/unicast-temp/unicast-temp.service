@@ -1,0 +1,13 @@
+[Unit]
+Description=Contiki-based temperature monitoring launcher
+After=network.target
+
+[Service]
+ExecStart=/home/pi/contiki-3.0/projects/zoul/firefly/unicast-temp/launch.sh
+Restart=always
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
+

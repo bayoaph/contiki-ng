@@ -1,2 +1,3 @@
-# contiki-ng
-A public repository of contiki-ng projects
+# Contiki Projects
+
+Projects based on Contiki-3.0. 

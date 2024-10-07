@@ -1,0 +1,13 @@
+[Unit]
+Description=Contiki-based rssi measurement launcher
+After=network.target
+
+[Service]
+ExecStart=/home/pi/contiki-3.0/contiki-projects/firefly/rssi-check/launch.sh
+Restart=always
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
+
