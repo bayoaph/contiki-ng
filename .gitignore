@@ -1,3 +1,9 @@
+# Build directories
 obj_native/
 obj_zoul/
+
+# Secrets
 **/data/
+
+# Workspaces
+macabilo.code-workspace
