@@ -1,6 +1,5 @@
 # Contiki Projects
 ---
-Brief:<br>
 Projects based on Contiki-NG. 
 
 ---
