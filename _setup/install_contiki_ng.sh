@@ -2,7 +2,7 @@
 
 # Clone the Contiki-NG repository
 echo "Cloning the Contiki-NG repository..."
-git clone https://github.com/contiki-ng/contiki-ng.git
+git clone https://github.com/contiki-ng/contiki-ng.git main_contiki
 
 # Check if the clone was successful
 if [ $? -eq 0 ]; then
