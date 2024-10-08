@@ -1,4 +1,6 @@
-/* Based on exercises by Philipp Hurni, University of Bern, December 2013 */
+
+/* Philipp Hurni, University of Bern, December 2013 	 */
+/* Modified for Zolertia Firefly - M. Cabilo, Apr 2019 */
 
 #include "contiki.h"
 #include "etimer.h"
@@ -55,9 +57,9 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
 /* Exercise 1a: compile the Contiki OS and flash the node attached to the PC via USB with
  * the above process it usually works best with flashing when you are the superuser
  *
- * $ cd <exercise1-path>
+ * $ cd <item01-path>
  * $ make
- * $ make exercise1.upload
+ * $ make item01.upload
  *
  * then run the following command
  * $ make login
@@ -83,7 +85,6 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
  */
 
 /* Exercise 1f: separate the led blinking logic from the "Hello World"
- *
  * printing logic: use two different processes, one that a) infinitely turns on and off the blue
  * LED (blink time = 1s, repeat interval=4s) and one that b) infinitely prints "Hello World"
  * with an interval of 10s

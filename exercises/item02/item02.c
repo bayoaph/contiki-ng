@@ -1,21 +1,27 @@
 
-/* Based on exercises by Philipp Hurni, University of Bern, December 2013     */
+/* Philipp Hurni, University of Bern, December 2013     */
+/* Modified for Zolertia Firefly - M. Cabilo, Apr 2019  */
 
 #include <stdio.h> /* For printf() */
 #include <string.h>
 #include "dev/button-sensor.h" /* for the button sensor */
-#include "dev/zoul-sensors.h"
-#include "node-id.h" /* get the variable node_id that holds the own node id */
+#include "dev/zoul-sensors.h"  /* for the temperature sensor */
+#include "node-id.h"           /* get the variable node_id that holds the own node id */
 #include "dev/leds.h"
 /*---------------------------------------------------------------------------*/
 PROCESS(button_press_process, "Button Press Process");
 /*---------------------------------------------------------------------------*/
+
+void print_temperature_int_to_float(uint16_t temp)
+{
+  printf("%u.%uC\n", temp / 1000, temp % 1000);
+}
+
 PROCESS_THREAD(button_press_process, ev, data)
 {
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(button_sensor);
-  static uint16_t temp;
 
   while (1)
   {
@@ -25,8 +31,7 @@ PROCESS_THREAD(button_press_process, ev, data)
 
     printf("Temperature: ");
     SENSORS_ACTIVATE(cc2538_temp_sensor);
-    temp = cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED);
-    printf("%u.%03uC\n", (unsigned)temp / 1000, (unsigned)temp % 1000);
+    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
     SENSORS_DEACTIVATE(cc2538_temp_sensor);
 
     leds_off(LEDS_BLUE);
@@ -49,6 +54,6 @@ AUTOSTART_PROCESSES(&button_press_process);
 
 /*
  * Exercise 2c: read out the temperature from the temperature
- * sensor when the button is pressed.
- *
+ * sensor when the button is pressed. print the temperature to the serial interface by
+ * passing the value read from the sensor to print_temperature_int_to_float().
  */

@@ -1,11 +1,5 @@
 # Contiki Projects
 ---
-Principal author: Mark Anthony Cabilo
-Contributors: ...
-Created: April 2019
-Restored: October 2024
----
-Brief:<br>
 Projects based on Contiki-NG. 
 
 ---
@@ -16,28 +10,41 @@ Projects based on Contiki-NG.
 4. Initiate `main_contiki` submodule.
 
 ---
-**If running WSL**
-
----
-**Sample Projects**
-
----
 **Usage**
-1. Defining `target`, `board`, and `port`. You can create a file named `Makefile.target` to automatically feed target to your build commands. Put this file on the project folder root. The content of the file may look like as follows:
+For most projects with configured `Makefile` and `Makefile.target` files, the following commands apply:
+1. Compiling: 
 ```
-TARGET = zoul
-BOARD = firefly
+cd <path_to_your_project> 
+$ make 
+```
+2. Uploading (same directory):
+```
+$ make <src_name>.upload
+```
+3. Viewing logs on serial (same directory):
+```
+$ make login
+```
+---
+**Setting up Makefile.target**
+`Makefile.target` is usefull in directing the compiler the intended device for your programs. 
+1. In the root folder of your project, create `Makefile.target`.
+```
+$ cd <path_to_your_project>
+$ touch Makefile.target
+```
+2. Inside the file, define the target IoT device, specific board, and port where it is plugged in. The example below is for Zolertia Firefly motes.
+```
+$ nano Makefile.target
+{Inside the file}
+TARGET=zoul
+BOARD=firefly
 PORT=/dev/ttyUSB0
 ```
-2. If `Makefile` is defined, use the following command to compile source files in the project folder:
-```
-make
-```
-3. If `Makefile` is defined, use the following command to compile and upload code into your target device:
-```
-make <nameOfFile>.upload
-```
-4. To access the device's serial after upload, use the following command:
-```
-make login
-```
+From here, you can compile or upload codes as mentioned above.
+
+---
+Principal author: Mark Anthony Cabilo
+Contributors: ...
+Created: April 2019
+Restored: October 2024
