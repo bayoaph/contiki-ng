@@ -92,3 +92,6 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
  * The two processes shall be started when the node boots. The first (a) shall start immediately,
  * the second (b) shall start 30s after bootup.
  */
+
+/* a comment to commit a crime */
+
