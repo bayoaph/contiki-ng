@@ -1,0 +1,30 @@
+#ifndef PROJECT_CONF_H_
+#define PROJECT_CONF_H_
+
+#define DEBUG_APP		1
+#define UNICAST_CHANNEL 	140
+#define SAMPLING_INTERVAL	60*CLOCK_SECOND //1min
+#define MIN_INVOLUNTARY_INTERVAL 60 //1 hour
+#define SINK_ADDRESS		0x0010
+#define FIREFLY_RATED_CURRENT	1
+#define FIREFLY_RATED_VOLTAGE	3.3 //v
+#define FIREFLY_CPU_CURRENT	0.6 //mA
+#define FIREFLY_LPM_CURRENT	0.0013 //mA
+#define FIREFLY_TX_CURRENT	24.0 //mA
+#define FIREFLY_RX_CURRENT	20.0 //mA
+#define FIREFLY_TX_CURRENT_IDLE 0.25*FIREFLY_TX_CURRENT
+#define FIREFLY_RX_CURRENT_IDLE 0.25*FIREFLY_RX_CURRENT
+
+/* comment out the following to use sub-ghz antenna */
+//#undef NETSTACK_CONF_RADIO
+//#define NETSTACK_CONF_RADIO	cc1200_driver
+//#define NETSTACK_CONF_RDC	nullrdc_driver
+//#define CC1200_CONF_USE_GPIO2	0
+//#define CC1200_CONF_USE_RX_WATCHDOG	0
+//#define ANTENNA_SW_SELECT_DEF_CONF	ANTENNA_SW_SELECT_SUBGHZ
+
+
+#define FORCED_READING	1
+
+
+#endif //project_conf_h

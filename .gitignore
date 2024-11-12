@@ -1,0 +1,11 @@
+# Build directories
+obj_native/
+obj_zoul/
+/_setup/gcc-arm-none-eabi-9-2020-q2-update/
+main_contiki/
+
+# Secrets
+**/data/
+
+# Workspaces
+macabilo.code-workspace
