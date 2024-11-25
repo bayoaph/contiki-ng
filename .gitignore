@@ -1,8 +1,8 @@
 # Build directories
 obj_native/
 obj_zoul/
-**/build/*
-
+_setup/
+**/build/
 # Secrets
 **/data/
 
