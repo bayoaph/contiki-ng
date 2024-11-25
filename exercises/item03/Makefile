@@ -1,6 +1,4 @@
 CONTIKI_PROJECT = item03
-TARGET=zoul
-BOARD=firefly
 all: $(CONTIKI_PROJECT)
 
 CFLAGS = -DWITH_UIP=1

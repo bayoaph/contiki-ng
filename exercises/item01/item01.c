@@ -6,7 +6,7 @@
 #include "etimer.h"
 #include <stdio.h>
 #include <string.h>
-#include "node-id.h" /* get the variable node_id that holds the own node id */
+// #include "node-id.h" /* get the variable node_id that holds the own node id */
 #include "dev/leds.h"
 /*---------------------------------------------------------------------------*/
 PROCESS(led_blink_process, "LED Blink Timer Process");
@@ -77,6 +77,7 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
  * The light starts turning off
  
  */
+// this is my answer
 
 /* Exercise 1c: alter the program such that the node prints "Hello World" infinitely to the screen,
  * with the delay of 4 seconds in between each statement
