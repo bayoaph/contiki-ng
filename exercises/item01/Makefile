@@ -6,5 +6,5 @@ CFLAGS += -Wno-error=unused-result
 
 # DEFINES=NETSTACK_CONF_RDC=contikimac_driver,NETSTACK_CONF_MAC=csma_driver
 DEFINES=NETSTACK_CONF_RDC=nullrdc_driver,NETSTACK_CONF_MAC=csma_driver
-CONTIKI = ../../main_contiki
+CONTIKI = /home/karen/contiki-ng/_setup/main_contiki
 include $(CONTIKI)/Makefile.include
