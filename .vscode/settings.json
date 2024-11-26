@@ -4,6 +4,7 @@
     "zoul-sensors.h": "c",
     "node-id.h": "c",
     "leds.h": "c",
-    "button-sensor.h": "c"
+    "button-sensor.h": "c",
+    "string.h": "c"
   }
 }

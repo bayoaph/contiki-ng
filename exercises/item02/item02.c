@@ -4,8 +4,8 @@
 
 #include <stdio.h> /* For printf() */
 #include <string.h>
-#include "dev/button-sensors.h" /* for the button sensor */
 #include "dev/zoul-sensor.h"  /* for the temperature sensor */
+#include "dev/button-sensors.h" /* for the button sensor */
 #include "node-id.h"           /* get the variable node_id that holds the own node id */
 #include "dev/leds.h"
 /*---------------------------------------------------------------------------*/

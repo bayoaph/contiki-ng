@@ -78,7 +78,7 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
  * Observe what happens
   
   OBSERVATION: 
-  After commenting the lines :
+  In commenting the lines :
     leds_off(LEDS_GREEN);
     etimer_set(&timer_wait, CLOCK_SECOND * 3);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
