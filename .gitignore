@@ -1,9 +1,13 @@
 # Build directories
 obj_native/
 obj_zoul/
+**/build/
 
 # Secrets
 **/data/
 
 # Workspaces
 macabilo.code-workspace
+
+# Ignore the main_contiki folder
+_setup/
