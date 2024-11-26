@@ -1,3 +1,6 @@
 [submodule "main_contiki"]
 	path = main_contiki
 	url = https://github.com/contiki-ng/contiki-ng.git
+[submodule "_setup/main_contiki"]
+	path = _setup/main_contiki
+	url = https://github.com/contiki-ng/contiki-ng.git
