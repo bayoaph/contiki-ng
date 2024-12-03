@@ -1,7 +1,8 @@
 CONTIKI_PROJECT = item01
 all: $(CONTIKI_PROJECT)
 
-CFLAGS += -DWITH_UIP=1
+CFLAGS = -DWITH_UIP=1
+CFLAGS += -Wno-error=unused-result
 
 # DEFINES for network stack
 DEFINES += NETSTACK_CONF_RDC=nullrdc_driver,NETSTACK_CONF_MAC=csma_driver
