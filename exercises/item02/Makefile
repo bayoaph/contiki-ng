@@ -8,5 +8,7 @@ DEFINES=NETSTACK_CONF_RDC=nullrdc_driver,NETSTACK_CONF_MAC=csma_driver
 
 CONTIKI = /home/kcerio/IoT/contiki-ng/_setup/main_contiki
 include $(CONTIKI)/Makefile.include
+CONTIKI = /home/kcerio/IoT/contiki-ng/_setup/main_contiki
+include $(CONTIKI)/Makefile.include
 CFLAGS += -I$(CONTIKI)/arch/platform/zoul
 CFLAGS += -I$(CONTIKI)/os
