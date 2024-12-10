@@ -2,13 +2,16 @@
 
 #include "contiki.h"
 #include <stdio.h> /* For printf() */
-#include "etimer.h"
+#include "sys/etimer.h"
 #include <string.h>
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
-#include "node-id.h" /* get a pointer to the own node id */
-#include "dev/zoul-sensors.h"
-#include "simple-udp.h"
+#include "sys/node-id.h" /* get a pointer to the own node id */
+//#include "dev/zoul-sensors.h"
+#include "dev/sht11/sht11-sensor.h"
+#include "net/ipv6/simple-udp.h"
+#include "net/ipv6/uiplib.h"
+
 
 #define UDP_PORT 1234
 #define BROADCAST_ADDR "ff02::1" // Link-local all nodes multicast address
@@ -37,13 +40,19 @@ static void send_broadcast_packet(struct temperatureMessage *payload)
   memcpy(buffer, payload, sizeof(struct temperatureMessage)); // Serialize
 
   uiplib_ipaddrconv(BROADCAST_ADDR, &broadcast_addr);
-  simple_udp_sendto(&udp_conn, buffer, strlen(buffer), &broadcast_addr);
+  simple_udp_sendto(&udp_conn, buffer, sizeof(struct temperatureMessage), &broadcast_addr);
 }
 
 // Callback function to handle incoming packets
-static void udp_recv_callback(struct simple_udp_connection *c, const uip_ipaddr_t *sender_addr, const uint8_t *data, uint16_t datalen)
-{
+static void udp_recv_callback(struct simple_udp_connection *c,
+                               const uip_ipaddr_t *sender_addr,
+                               uint16_t sender_port,
+                               const uip_ipaddr_t *receiver_addr,
+                               uint16_t receiver_port,
+                               const uint8_t *data,
+                               uint16_t datalen){
   struct temperatureMessage received_data;
+  
   memcpy(&received_data, data, sizeof(struct temperatureMessage)); // Deserialize
 
   printf("Received Sensor Data: Message = %s, Temperature = %u\n", received_data.messageString, received_data.temperature);
@@ -69,10 +78,11 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
   // PROCESS_EXITHANDLER(broadcast_close(&bc);)
   PROCESS_BEGIN();
 
-  SENSORS_ACTIVATE(cc2538_temp_sensor);
+  //SENSORS_ACTIVATE(cc2538_temp_sensor);
+  SENSORS_ACTIVATE(sht11_sensor);
 
   printf("Starting broadcast\n");
-  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback)
+  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback);
 
       /* Broadcast every 4 seconds */
       etimer_set(&et, 4 * CLOCK_SECOND);
@@ -83,7 +93,7 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
     etimer_reset(&et);
 
     // Temperature of 0 means no sensor, checked using node_id an even number
-    uint16_t temperature = (node_id % 2 == 0) ? cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED) : 0;
+    uint16_t temperature = (node_id % 2 == 0) ? sht11_sensor.value(SHT11_SENSOR_TEMP) : 0;
 
     // Send a different message, depending on the existence of a temperature sensor
     if (node_id % 2 == 0)
@@ -104,7 +114,8 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
     printf("sent broadcast message\n");
   }
 
-  SENSORS_DEACTIVATE(cc2538_temp_sensor);
+  //SENSORS_DEACTIVATE(cc2538_temp_sensor);
+  SENSORS_DEACTIVATE(sht11_sensor);
 
   PROCESS_END();
 }

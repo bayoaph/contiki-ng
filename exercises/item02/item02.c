@@ -2,91 +2,61 @@
 /* Philipp Hurni, University of Bern, December 2013     */
 /* Modified for Zolertia Firefly - M. Cabilo, Apr 2019  */
 
-#include <stdio.h> /* For printf() */
-#include <string.h>
-#include "dev/button-sensor.h" /* for the button sensor */
-#include "dev/zoul-sensors.h"  /* for the temperature sensor */
-#include "node-id.h"           /* get the variable node_id that holds the own node id */
-#include "dev/leds.h"
-/*---------------------------------------------------------------------------*/
-PROCESS(button_press_process, "Button Press Process");
-/*---------------------------------------------------------------------------*/
+// #include <stdio.h> /* For printf() */
+// #include <string.h>
+// #include "dev/button-sensor.h" /* for the button sensor */
+// #include "dev/zoul-sensors.h"  /* for the temperature sensor */
+// #include "sys/node-id.h"  /* get the variable node_id that holds the own node id */
+// #include "dev/leds.h"
+// /*---------------------------------------------------------------------------*/
+// PROCESS(button_press_process, "Button Press Process");
+// /*---------------------------------------------------------------------------*/
 
-void print_temperature_int_to_float(uint16_t temp)
-{
-  printf("%u.%uC\n", temp / 1000, temp % 1000);
-}
+// void print_temperature_int_to_float(uint16_t temp)
+// {
+//   printf("%u.%uC\n", temp / 1000, temp % 1000);
+// }
 
-PROCESS_THREAD(button_press_process, ev, data)
-{
-  PROCESS_BEGIN();
+// PROCESS_THREAD(button_press_process, ev, data)
+// {
+//   PROCESS_BEGIN();
 
-  SENSORS_ACTIVATE(button_sensor);
+//   SENSORS_ACTIVATE(button_sensor);
 
-  while (1)
-  {
-    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+//   while (1)
+//   {
+//     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-    leds_on(LEDS_YELLOW);
-    //printf("button pressed\n");  // For Exercise 2b
+//     leds_on(LEDS_YELLOW);
+//     //printf("button pressed\n");  // For Exercise 2b
 
-    printf("Temperature: ");
-    SENSORS_ACTIVATE(cc2538_temp_sensor);
-    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-    SENSORS_DEACTIVATE(cc2538_temp_sensor);
+//     printf("Temperature: ");
+//     SENSORS_ACTIVATE(cc2538_temp_sensor);
+//     print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
+//     SENSORS_DEACTIVATE(cc2538_temp_sensor);
 
-    leds_off(LEDS_YELLOW);
-    leds_off(LEDS_YELLOW);
-  }
+//     leds_off(LEDS_YELLOW);
+//     leds_off(LEDS_YELLOW);
+//   }
 
-  PROCESS_END();
-}
+//   PROCESS_END();
+// }
 
-/*---------------------------------------------------------------------------*/
-AUTOSTART_PROCESSES(&button_press_process);
-/*---------------------------------------------------------------------------*/
+// /*---------------------------------------------------------------------------*/
+// AUTOSTART_PROCESSES(&button_press_process);
+// /*---------------------------------------------------------------------------*/
 
 /* Exercise 2a: compile and run the program. press the button, observe what it does with
  * the serial interface
 
  My Answer:
- Once the program is compiled and runned, the LED turns on everytime the button is pressed. Additionally,
- the temperature sensor reads and prints the temperature in Celsius.
-
- My Answer:
- Once the program is compiled and runned, the LED turns on everytime the button is pressed. Additionally,
- the temperature sensor reads and prints the temperature in Celsius.
+ To run the program in the simulation, I change the zoul sensor to sht11-sensor.h to run the program using a sky mote 
+ (as shown in the my simulation section below). Once the program is compiled and runned, the LED turns on everytime the 
+ button is pressed. Additionally, the temperature sensor reads and prints the temperature in Celsius.
  */
 
 /* Exercise 2b: alter the program such that whenever the button is pressed, the led
  * blinks and the string "button pressed" is printed
-
-
-  My Answer:
-  In here, everytime the button is pressed, the LED is turned on, then text "button pressed" is printed 
-  before the LED is turned off.
-
-  Modified Process thread:
-  PROCESS_THREAD(button_press_process, ev, data)
-  {
-    PROCESS_BEGIN();
-
-    SENSORS_ACTIVATE(button_sensor);
-
-    while (1)
-    {
-      PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
-
-      // Blink the LED
-      leds_on(LEDS_YELLOW);
-      printf("button pressed\n");
-      leds_off(LEDS_YELLOW);
-    }
-
-    PROCESS_END();
-  }
-
-  
 
 
   My Answer:
@@ -129,6 +99,7 @@ and the temperature is read by the sensor then printed its value in Celsius thro
 before the LED is turned off.
 
 
+Using zoul sensor
 Modified program:
 #include <stdio.h> // For printf() 
 #include <string.h>
@@ -175,86 +146,21 @@ AUTOSTART_PROCESSES(&button_press_process);
 -----------------------------------------------------
 
 
-
-*/
-
-
-
-
-// For simulation:
-// #include <stdio.h> /* For printf() */
-// #include "contiki.h"
-// #include "dev/button-sensor.h" /* For the button sensor */
-// #include "dev/sht11-arch.h"    /* For SHT11 hardware abstraction */
-// #include "dev/leds.h"          /* For LED control */
-
-// /*---------------------------------------------------------------------------*/
-// PROCESS(button_press_process, "Button Press Process");
-// AUTOSTART_PROCESSES(&button_press_process);
-// /*---------------------------------------------------------------------------*/
-
-// // Convert raw SHT11 temperature data to Celsius
-// void print_temperature_arch_to_float(uint16_t raw_temp) {
-//   float temp = -39.6 + 0.01 * raw_temp; // SHT11 formula
-//   printf("Temperature: %.2f°C\n", (double)temp);
-// }
-
-// /*---------------------------------------------------------------------------*/
-// PROCESS_THREAD(button_press_process, ev, data) {
-//   PROCESS_BEGIN();
-
-//   // Activate the button sensor
-//   SENSORS_ACTIVATE(button_sensor);
-
-//   while (1) {
-//     // Wait for button press event
-//     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
-
-//     // Blink the LED
-//     leds_on(LEDS_RED); // Turn on the red LED
-//     printf("Button pressed\n");
-//     clock_delay_usec(500000UL); // Use unsigned long for larger values; // 0.5-second delay
-//     leds_off(LEDS_RED);
-
-//     // Read raw temperature using sht11_arch
-//     uint16_t raw_temp = sht11_arch_read(SHT11_ARCH_TEMP); // Use hardware abstraction function
-//     if (raw_temp != 0xFFFF) { // Check if the reading is valid
-//       print_temperature_arch_to_float(raw_temp);
-//     } else {
-//       printf("Failed to read temperature\n");
-//     }
-//   }
-
-//   // Cleanup (optional)
-//   SENSORS_DEACTIVATE(button_sensor);
-
-//   PROCESS_END();
-// }
-
-
- * 
-
-
-My Answer:
-In here, everytime the button is pressed, the LED is turned on, then text "button pressed" is printed, 
-and the temperature is read by the sensor then printed its value in Celsius through the  print_temperature_int_to_float()
-before the LED is turned off.
-
-
-Modified program:
-#include <stdio.h> // For printf() 
-#include <string.h>
-#include "dev/button-sensor.h"  //for the button sensor 
-#include "dev/zoul-sensors.h"  //for the temperature sensor 
-#include "node-id.h"            //get the variable node_id that holds the own node id 
+Using sky mote
+Modified Program:
+#include <stdio.h>                      //For printf() 
+#include "dev/button-sensor.h"         // for the button sensor 
+#include "dev/sht11/sht11-sensor.h"   // for the temperature sensor 
+#include "sys/node-id.h"              // get the variable node_id that holds the own node id 
 #include "dev/leds.h"
 
------------------------------------------------------------
+---------------------------------------------------------------------------
 PROCESS(button_press_process, "Button Press Process");
------------------------------------------------------------
+---------------------------------------------------------------------------
+
 void print_temperature_int_to_float(uint16_t temp)
 {
-  printf("%u.%uC\n", temp / 1000, temp % 1000);
+  printf("%u.%uC\n", temp / 10, temp % 10);  // SHT11 reports in tenths of degrees
 }
 
 PROCESS_THREAD(button_press_process, ev, data)
@@ -262,29 +168,29 @@ PROCESS_THREAD(button_press_process, ev, data)
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(button_sensor);
+  SENSORS_ACTIVATE(sht11_sensor);
 
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-    // Turn on LED and print button press message
-    leds_on(LEDS_YELLOW);
+    leds_on(LEDS_GREEN);
     printf("button pressed\n");
-
-    // Print the temperature
     printf("Temperature: ");
-    SENSORS_ACTIVATE(cc2538_temp_sensor);
-    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-    SENSORS_DEACTIVATE(cc2538_temp_sensor);
+    print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
 
-    leds_off(LEDS_YELLOW); // Turn off LED
+    leds_off(LEDS_GREEN);
   }
+
+  SENSORS_DEACTIVATE(sht11_sensor);
+  SENSORS_DEACTIVATE(button_sensor);
 
   PROCESS_END();
 }
-----------------------------------------------------
+
+---------------------------------------------------------------------------
 AUTOSTART_PROCESSES(&button_press_process);
------------------------------------------------------
+---------------------------------------------------------------------------
 
 
 
@@ -293,53 +199,48 @@ AUTOSTART_PROCESSES(&button_press_process);
 
 
 
-// For simulation:
-// #include <stdio.h> /* For printf() */
-// #include "contiki.h"
-// #include "dev/button-sensor.h" /* For the button sensor */
-// #include "dev/sht11-arch.h"    /* For SHT11 hardware abstraction */
-// #include "dev/leds.h"          /* For LED control */
+// For simulation (Using sky mote):
+#include <stdio.h> /* For printf() */
+#include "dev/button-sensor.h" /* for the button sensor */
+#include "dev/sht11/sht11-sensor.h"  /* for the temperature sensor */
+#include "sys/node-id.h"  /* get the variable node_id that holds the own node id */
+#include "dev/leds.h"
 
-// /*---------------------------------------------------------------------------*/
-// PROCESS(button_press_process, "Button Press Process");
-// AUTOSTART_PROCESSES(&button_press_process);
-// /*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+PROCESS(button_press_process, "Button Press Process");
+/*---------------------------------------------------------------------------*/
 
-// // Convert raw SHT11 temperature data to Celsius
-// void print_temperature_arch_to_float(uint16_t raw_temp) {
-//   float temp = -39.6 + 0.01 * raw_temp; // SHT11 formula
-//   printf("Temperature: %.2f°C\n", (double)temp);
-// }
+void print_temperature_int_to_float(uint16_t temp)
+{
+  printf("%u.%uC\n", temp / 10, temp % 10);  // SHT11 reports in tenths of degrees
+}
 
-// /*---------------------------------------------------------------------------*/
-// PROCESS_THREAD(button_press_process, ev, data) {
-//   PROCESS_BEGIN();
+PROCESS_THREAD(button_press_process, ev, data)
+{
+  PROCESS_BEGIN();
 
-//   // Activate the button sensor
-//   SENSORS_ACTIVATE(button_sensor);
+  SENSORS_ACTIVATE(button_sensor);
+  SENSORS_ACTIVATE(sht11_sensor);
 
-//   while (1) {
-//     // Wait for button press event
-//     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+  while (1)
+  {
+    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-//     // Blink the LED
-//     leds_on(LEDS_RED); // Turn on the red LED
-//     printf("Button pressed\n");
-//     clock_delay_usec(500000UL); // Use unsigned long for larger values; // 0.5-second delay
-//     leds_off(LEDS_RED);
+    leds_on(LEDS_GREEN);
 
-//     // Read raw temperature using sht11_arch
-//     uint16_t raw_temp = sht11_arch_read(SHT11_ARCH_TEMP); // Use hardware abstraction function
-//     if (raw_temp != 0xFFFF) { // Check if the reading is valid
-//       print_temperature_arch_to_float(raw_temp);
-//     } else {
-//       printf("Failed to read temperature\n");
-//     }
-//   }
+    printf("Temperature: ");
+    print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
 
-//   // Cleanup (optional)
-//   SENSORS_DEACTIVATE(button_sensor);
+    leds_off(LEDS_GREEN);
+  }
 
-//   PROCESS_END();
-// }
+  SENSORS_DEACTIVATE(sht11_sensor);
+  SENSORS_DEACTIVATE(button_sensor);
+
+  PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
+AUTOSTART_PROCESSES(&button_press_process);
+/*---------------------------------------------------------------------------*/
 
