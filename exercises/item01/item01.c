@@ -17,16 +17,16 @@ PROCESS_THREAD(led_blink_process, ev, data)
 {
   PROCESS_BEGIN();
   static struct etimer timer_blink, timer_wait;
-  // Blink pattern every 4 seconds
+  // Blink pattern every 4 seconds, 1 second for LED on
 
   while (1)
   {
-    leds_on(LEDS_BLUE);
-    etimer_set(&timer_blink, CLOCK_SECOND * 1);
+    leds_on(LEDS_GREEN);          // Turn on the green LED
+    etimer_set(&timer_blink, CLOCK_SECOND * 1);  // Keep the LED on for 1 second
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
 
-    leds_off(LEDS_BLUE);
-    etimer_set(&timer_wait, CLOCK_SECOND * 3);
+    leds_off(LEDS_GREEN);         // Turn off the green LED
+    etimer_set(&timer_wait, CLOCK_SECOND * 3);  // Wait for 3 seconds before repeating
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
   }
 
@@ -36,16 +36,15 @@ PROCESS_THREAD(led_blink_process, ev, data)
 PROCESS_THREAD(hello_world_process, ev, data)
 {
   PROCESS_BEGIN();
-  static struct etimer timer_startup, timer_wait;
-
-  etimer_set(&timer_startup, CLOCK_SECOND * 30);
-  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_startup));
+  static struct etimer timer_print;
+  static int counter = 0;
 
   while (1)
-  {
+  {    
     printf("Hello, world\n");
-    etimer_set(&timer_wait, CLOCK_SECOND * 10);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+    counter++;
+    etimer_set(&timer_print, CLOCK_SECOND * 10);  // Wait for 10 seconds before printing again
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_print));
   }
 
   PROCESS_END();
@@ -81,12 +80,13 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
 /* Exercise 1d: alter the program such that the node stops printing "Hello World" after 10 times
  */
 
-/* Exercise 1e: alter the program such that the node turns on the blue led in each loop,
+/* Exercise 1e: alter the program such that the node turns on the green led in each loop,
  * keeps it turned on for 1 second and then continues.
+ * GREEN WALANG BLUE HAHA
  */
 
 /* Exercise 1f: separate the led blinking logic from the "Hello World"
- * printing logic: use two different processes, one that a) infinitely turns on and off the blue
+ * printing logic: use two different processes, one that a) infinitely turns on and off the green
  * LED (blink time = 1s, repeat interval=4s) and one that b) infinitely prints "Hello World"
  * with an interval of 10s
  *
