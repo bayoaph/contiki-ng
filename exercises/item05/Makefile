@@ -1,4 +1,5 @@
-CONTIKI_PROJECT = item02
+CONTIKI_PROJECT = exercise5
+TARGET=sky
 all: $(CONTIKI_PROJECT)
 
 CFLAGS = -DWITH_UIP=1
@@ -6,7 +7,5 @@ CFLAGS = -DWITH_UIP=1
 # DEFINES=NETSTACK_CONF_RDC=contikimac_driver,NETSTACK_CONF_MAC=csma_driver
 DEFINES=NETSTACK_CONF_RDC=nullrdc_driver,NETSTACK_CONF_MAC=csma_driver
 
-CONTIKI = ../../main_contiki
-CFLAGS += -I$(CONTIKI)/arch/platform/zoul
-CFLAGS += -I$(CONTIKI)/os
+CONTIKI = ../..
 include $(CONTIKI)/Makefile.include
