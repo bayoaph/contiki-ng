@@ -21,11 +21,11 @@ PROCESS_THREAD(led_blink_process, ev, data)
 
   while (1)
   {
-    leds_on(LEDS_BLUE);
+    leds_on(LEDS_RED);
     etimer_set(&timer_blink, CLOCK_SECOND * 1);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
 
-    leds_off(LEDS_BLUE);
+    leds_off(LEDS_RED);
     etimer_set(&timer_wait, CLOCK_SECOND * 3);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
   }
@@ -72,23 +72,96 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
 /* Exercise 1b: uncomment the three lines with the timer, compile and flash it to the sensor.
  * Observe what happens
  */
-// this is my answer
+// When I uncomment the three lines with the timer, compiled and run it. I noticed that the LED light blinked.
+// If we based it on the code that was uncommented, the LED light will turn off for 3 seconds and will turn back on for 1 second.
 
 /* Exercise 1c: alter the program such that the node prints "Hello World" infinitely to the screen,
  * with the delay of 4 seconds in between each statement
  */
+//The altered program would be as follows:
+
+// while (1)
+//   {
+//     printf("Hello, world\n");
+//     etimer_set(&timer_wait, CLOCK_SECOND * 4);
+//     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+//   }
+
+//This altered program prints Hello, world every 4 seconds.
 
 /* Exercise 1d: alter the program such that the node stops printing "Hello World" after 10 times
  */
+
+//statict int counter = 0;
+// while (counter < 10)
+//   {
+//     printf("Hello, world\n");
+//     etimer_set(&timer_wait, CLOCK_SECOND * 10);
+//     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+//     counter++;
+//   }
+
+//Above is the altered program wherein it stops printing Hello World after 10 iterations.
 
 /* Exercise 1e: alter the program such that the node turns on the blue led in each loop,
  * keeps it turned on for 1 second and then continues.
  */
 
+// while (1)
+//   {
+//     leds_on(LEDS_RED);
+//     etimer_set(&timer_blink, CLOCK_SECOND * 1);
+//     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
+//     leds_off(LEDS_RED);
+//   }
+
+//For this scenario, after I run the program in Cooja, i noticed that cooja doesn't support blue LED. Thus, I opted to use the red LED.
+//When I run this program, the LED will turn on for a second then turns off automatically.
+
 /* Exercise 1f: separate the led blinking logic from the "Hello World"
  * printing logic: use two different processes, one that a) infinitely turns on and off the blue
  * LED (blink time = 1s, repeat interval=4s) and one that b) infinitely prints "Hello World"
  * with an interval of 10s
+ * 
+ * PROCESS_THREAD(led_blink_process, ev, data)
+{
+  PROCESS_BEGIN();
+  static struct etimer timer_blink, timer_wait;
+  // Blink pattern every 4 seconds
+
+  while (1)
+  {
+    leds_on(LEDS_RED);
+    etimer_set(&timer_blink, CLOCK_SECOND * 1);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
+
+    leds_off(LEDS_RED);
+    etimer_set(&timer_wait, CLOCK_SECOND * 3);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+  }
+
+  PROCESS_END();
+}
+
+PROCESS_THREAD(hello_world_process, ev, data)
+{
+  PROCESS_BEGIN();
+  static struct etimer timer_startup, timer_wait;
+
+  etimer_set(&timer_startup, CLOCK_SECOND * 30);
+  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_startup));
+
+  while (1)
+  {
+    printf("Hello, world\n");
+    etimer_set(&timer_wait, CLOCK_SECOND * 10);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+  }
+
+  PROCESS_END();
+}
+
+In this line of codes, I have separated the two processes of turning on the LED light and printing Hello, world.
  *
  * The two processes shall be started when the node boots. The first (a) shall start immediately,
  * the second (b) shall start 30s after bootup.

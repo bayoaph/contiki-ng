@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = exercise5
+CONTIKI_PROJECT = finalExam
 TARGET=sky
 all: $(CONTIKI_PROJECT)
 
