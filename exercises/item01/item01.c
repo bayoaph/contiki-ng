@@ -25,6 +25,102 @@ PROCESS_THREAD(led_blink_process, ev, data)
     etimer_set(&timer_blink, CLOCK_SECOND * 1);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
 
+    // leds_off(LEDS_BLUE);
+    // etimer_set(&timer_wait, CLOCK_SECOND * 3);
+    // PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+  }
+
+  PROCESS_END();
+}
+
+// Original
+// PROCESS_THREAD(hello_world_process, ev, data)
+// {
+//   PROCESS_BEGIN();
+//   static struct etimer timer_startup, timer_wait;
+
+//   etimer_set(&timer_startup, CLOCK_SECOND * 30);
+//   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_startup));
+
+//   while (1)
+//   {
+//     printf("Hello, world\n");
+//     etimer_set(&timer_wait, CLOCK_SECOND * 10);
+//     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+//   }
+
+//   PROCESS_END();
+// }
+
+// Exercise 1c
+// PROCESS_THREAD(hello_world_process, ev, data)
+// {
+//   PROCESS_BEGIN();
+//   static struct etimer timer_startup, timer_wait;
+
+//   while (1)
+//   {
+//     printf("Hello, world\n");
+//     etimer_set(&timer_wait, CLOCK_SECOND * 4);
+//     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+//   }
+
+//   PROCESS_END();
+// }
+
+// Exercise 1d
+// PROCESS_THREAD(hello_world_process, ev, data)
+// {
+//   PROCESS_BEGIN();
+//   static struct etimer timer_startup, timer_wait;
+//   static int counter = 0;
+
+//   while (counter < 10)
+//   {
+//     printf("Hello, world\n");
+//     counter++;
+//     etimer_set(&timer_wait, CLOCK_SECOND * 4);
+//     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+//   }
+
+//   PROCESS_END();
+// }
+
+// Exercises 1e
+PROCESS_THREAD(hello_world_process, ev, data)
+{
+  PROCESS_BEGIN();
+  static struct etimer timer_startup, timer_led;
+
+  while (counter < 10)
+  {
+    leds_on(LEDS_BLUE);
+    etimer_set(&timer_led, CLOCK_SECOND * 1);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_led));
+    leds_off(LEDS_BLUE);
+
+    printf("Hello, world\n");
+    counter++;
+    etimer_set(&timer_wait, CLOCK_SECOND * 4);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+  }
+
+  PROCESS_END();
+}
+
+// Exercises 1f
+PROCESS_THREAD(led_blink_process, ev, data)
+{
+  PROCESS_BEGIN();
+  static struct etimer timer_blink, timer_wait;
+  // Blink pattern every 4 seconds
+
+  while (1)
+  {
+    leds_on(LEDS_BLUE);
+    etimer_set(&timer_blink, CLOCK_SECOND * 1);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
+
     leds_off(LEDS_BLUE);
     etimer_set(&timer_wait, CLOCK_SECOND * 3);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
@@ -73,6 +169,13 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
  * Observe what happens
  */
 // this is my answer
+/* When uncommenting the three lines below:
+ * leds_off(LEDS_BLUE);
+ * etimer_set(&timer_wait, CLOCK_SECOND * 3);
+ * PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
+ * The blue LED will turn on for 1 second. After 1 second, the LED will turn off and will stay off for 3 seconds. After that, the LED
+ * will turn on again for 1 second then turns off for 3 seconds and then repeat.
+*/
 
 /* Exercise 1c: alter the program such that the node prints "Hello World" infinitely to the screen,
  * with the delay of 4 seconds in between each statement

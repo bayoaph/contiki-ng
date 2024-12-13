@@ -18,16 +18,16 @@ PROCESS_THREAD(A_PROCESS, ev, data)
 
   etimer_set(&et, CLOCK_SECOND * 10);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-  static uint16_t localVariable = 100;
+  static unsigned localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", (void *)&localVariable);
 
   SENSORS_ACTIVATE(button_sensor);
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", (void *)&localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
@@ -44,8 +44,8 @@ PROCESS_THREAD(B_PROCESS, ev, data)
   {
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    unsigned randomNum = random_rand();
+    printf("B: %u (address=%p)\n", randomNum, (void *)&randomNum);
   }
   PROCESS_END();
 }
@@ -56,7 +56,8 @@ PROCESS(C_PROCESS, "C");
 PROCESS_THREAD(C_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
-  static uint16_t inc;
+  static struct etimer timer;
+  static unsigned inc = 0;
   while (1)
   {
     if (inc % 10000 == 0)
@@ -64,6 +65,10 @@ PROCESS_THREAD(C_PROCESS, ev, data)
     inc++;
     // Temporarily give the processor to another protothread
     PROCESS_PAUSE();
+
+    etimer_set(&timer, CLOCK_SECOND / 100);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+
   }
   PROCESS_END();
 }
@@ -80,9 +85,15 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  * When you press the "user" button, the process A again prints the value of the "localVariable"
  *
  * What value does it have when you run the program a) before the button sensor event and b) after ? why is it like this? explain.
+ * answer:
+ * The problem has a localVariable with a value of 100 before the button sensor event but after the button sensor event, it will most like
+ * be undefined or corrupted because the localVariable is a local variable that is only limited to the scope of PROCESS_THREAD. So when
+ * the event ends, its memory is no longer guaranteed to hold same value.
  *
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
+ * answer:
+ * Change the declaration of the variable to static, so it has fixed memory location and keeps its value across function calls and context switches
  *
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
