@@ -56,6 +56,7 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
+      <skin>org.contikios.cooja.plugins.skins.LEDVisualizerSkin</skin>
       <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 107.39310959195595 148.5970816020566</viewport>
     </plugin_config>
     <bounds x="1" y="1" height="400" width="400" />
@@ -67,7 +68,7 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <bounds x="400" y="160" height="240" width="412" z="1" />
+    <bounds x="400" y="160" height="303" width="837" z="2" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.TimeLine
@@ -78,7 +79,7 @@
       <showLEDs />
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
-    <bounds x="0" y="471" height="166" width="812" z="3" />
+    <bounds x="0" y="471" height="259" width="954" z="1" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Notes
@@ -86,6 +87,6 @@
       <notes>Enter notes here</notes>
       <decorations>true</decorations>
     </plugin_config>
-    <bounds x="400" y="0" height="160" width="412" z="2" />
+    <bounds x="400" y="0" height="160" width="412" z="3" />
   </plugin>
 </simconf>
