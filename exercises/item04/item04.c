@@ -1,12 +1,12 @@
-
 #include "contiki.h"
+#include "net/netstack.h"
 #include "net/ipv6/simple-udp.h"
-#include "net/ipv6/uip-debug.h"
+#include "net/ipv6/uip-debug.h" 
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
 #include "sys/node-id.h"
-#include "sys/rtimer.h"
 #include <stdio.h>
+
 
 #define UDP_PORT 1234
 
@@ -15,103 +15,99 @@ struct timeMessage {
   unsigned short originator;
 };
 
-/* two timeMessage struct declaration/instantiations */
 static struct timeMessage tmReceived;
 static struct timeMessage tmSent;
-
-/* UDP connection object */
 static struct simple_udp_connection udp_conn;
 
-/* UDP callback function */
-static void udp_callback(struct simple_udp_connection *c,
-                         const uip_ipaddr_t *sender_addr,
-                         uint16_t sender_port,
-                         const uip_ipaddr_t *receiver_addr,
-                         uint16_t receiver_port,
-                         const uint8_t *data,
-                         uint16_t datalen) {
-  clock_time_t rtt = clock_time(); // Capture current time to calculate RTT
+void print_temperature_binary_to_float(uint16_t temp) {
+  printf("%d.%d", (temp / 10 - 396) / 10, (temp / 10 - 396) % 10);
+}
 
-  /* Copy the received data into the tmReceived structure */
-  memcpy(&tmReceived, data, sizeof(struct timeMessage));
+static struct ctimer leds_off_timer_send;
 
-  printf("Packet received from ");
-  uip_debug_ipaddr_print(sender_addr);
-  printf("\nTime received = %lu clock ticks\n", (unsigned long)tmReceived.time);
-
-  /* If the packet is not ours, send it back */
-  if (tmReceived.originator != node_id) {
-    printf("Packet is not ours, echoing back\n");
-    simple_udp_sendto(c, &tmReceived, sizeof(tmReceived), sender_addr);
-  } else {
-      /* Our packet has returned; calculate RTT */
-      if (tmReceived.time <= clock_time()) {
-          // Simple subtraction, no wraparound
-          rtt = clock_time() - tmReceived.time;
-      } else {
-          // Handle wraparound in clock_time_t (16-bit) type
-          rtt = (clock_time_t)((~(uint16_t)0) - tmReceived.time + clock_time());
-      }
-
-      /* Calculate RTT in milliseconds safely */
-      // Use a larger data type for intermediate calculations to avoid overflow
-      unsigned long rtt_ms = (unsigned long)rtt * 1000UL / (unsigned long)CLOCK_SECOND;
-      printf("RTT = %lu ms\n", rtt_ms);
-  }
-
-
-  /* Blink LED as visual feedback */
-  leds_on(LEDS_BLUE);
-  clock_delay_usec(500000); // Wait for half a second
+/* Timer callback turns off the blue led */
+static void timerCallback_turnOffLeds() {
   leds_off(LEDS_BLUE);
 }
 
-/*---------------------------------------------------------------------------*/
-PROCESS(simple_udp_example_process, "Simple UDP Example");
-AUTOSTART_PROCESSES(&simple_udp_example_process);
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(simple_udp_example_process, ev, data) {
-  static uip_ipaddr_t peer_addr;
+static void udp_rx_callback(struct simple_udp_connection *c,
+                            const uip_ipaddr_t *sender_addr,
+                            uint16_t sender_port,
+                            const uip_ipaddr_t *receiver_addr,
+                            uint16_t receiver_port,
+                            const uint8_t *data, uint16_t datalen) {
+  clock_time_t current_time = clock_time();
 
-  PROCESS_BEGIN();
-
-  /* Initialize the button sensor */
-  SENSORS_ACTIVATE(button_sensor);
-
-  /* Register the UDP connection */
-  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_callback);
-
-  /* Define the peer's IPv6 address */
-  if (node_id % 2 == 0) {
-    uip_ip6addr(&peer_addr, 0xfe80, 0, 0, 0, 0, 0, 0, node_id + 1);
-  } else {
-    uip_ip6addr(&peer_addr, 0xfe80, 0, 0, 0, 0, 0, 0, node_id - 1);
-  }
-
-  printf("My address: ");
-  uip_debug_ipaddr_print(&peer_addr);
+  printf("Received packet from ");
+  uip_debug_ipaddr_print(sender_addr);
   printf("\n");
 
+  printf("UDP message received\n");
+  leds_on(LEDS_BLUE);
+  ctimer_set(&leds_off_timer_send, CLOCK_SECOND / 8, timerCallback_turnOffLeds, NULL);
+
+  if (datalen == sizeof(tmReceived)) {
+    memcpy(&tmReceived, data, sizeof(tmReceived));
+
+    printf("Packet received from ");
+    uip_debug_ipaddr_print(sender_addr);
+    printf("\n");
+
+    printf("time received = %lu clock ticks", (unsigned long)tmReceived.time);
+    printf(" = %lu secs ", (unsigned long)tmReceived.time / CLOCK_SECOND);
+    printf("%lu millis ", (1000L * ((unsigned long)tmReceived.time % CLOCK_SECOND)) / CLOCK_SECOND);
+    printf("originator = %u\n", tmReceived.originator);
+
+    if (tmReceived.originator != node_id) {
+      printf("Sending back the received timestamp\n");
+      simple_udp_sendto(&udp_conn, &tmReceived, sizeof(tmReceived), sender_addr);
+    } else {
+      clock_time_t rtt = current_time - tmReceived.time;
+      printf("RTT = %lu ms\n", (1000L * ((unsigned long)rtt % CLOCK_SECOND)) / CLOCK_SECOND);
+    }
+  } else {
+    printf("Received unexpected data\n");
+  }
+}
+
+PROCESS(example_udp_process, "RTT using Simple UDP");
+AUTOSTART_PROCESSES(&example_udp_process);
+
+PROCESS_THREAD(example_udp_process, ev, data) {
+  PROCESS_BEGIN();
+
+  uip_ipaddr_t addr;
+
+  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_rx_callback);
+
+  SENSORS_ACTIVATE(button_sensor);
+
   while (1) {
-    /* Wait for a button press */
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-    /* Populate the time message structure */
     tmSent.time = clock_time();
     tmSent.originator = node_id;
 
-    /* Send the message to the peer */
-    printf("Sending packet to ");
-    uip_debug_ipaddr_print(&peer_addr);
+    if (node_id % 2 == 0) {
+      uip_ip6addr(&addr, 0xfe80, 0, 0, 0, 0, 0, 0, node_id + 1);
+    } else {
+      uip_ip6addr(&addr, 0xfe80, 0, 0, 0, 0, 0, 0, node_id + 1); // Use a valid neighbor ID
+    }
+
+
+    printf("Node %u attempting to send to ", node_id);
+    uip_debug_ipaddr_print(&addr);
     printf("\n");
 
-    simple_udp_sendto(&udp_conn, &tmSent, sizeof(tmSent), &peer_addr);
+
+    simple_udp_sendto(&udp_conn, &tmSent, sizeof(tmSent), &addr);
+    printf("Sending packet to peer\n");
   }
 
   SENSORS_DEACTIVATE(button_sensor);
-
   PROCESS_END();
 }
+
 
 /*---------------------------------------------------------------------------*/
 

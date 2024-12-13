@@ -91,6 +91,7 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  *
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
+ * Answer:
  * Since the localVariable is already declared as static, it is ensured to be 100 since this keyword
  * ensures that the variable is allocated once and retains its value across function calls or events
  * within the same process. But, to prevent it from accidental modification within the process, we 

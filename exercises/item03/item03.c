@@ -8,7 +8,7 @@
 #include "dev/leds.h"
 #include "sys/node-id.h" /* get a pointer to the own node id */
 //#include "dev/zoul-sensors.h"
-#include "dev/sht11/sht11-sensor.h"
+#include "dev/sht11/sht11-sensor.h" // Using sht11 sensor instead of zoul
 #include "net/ipv6/simple-udp.h"
 #include "net/ipv6/uiplib.h"
 
@@ -150,11 +150,13 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
  *
  * 
  * My Answer:
- * In here, the nodes with temperature sensors (even nodes) reads the temperature and sends it to other nodes by broadcasting
- * it. The message is package in temperatureMessage data struct and is transmitted. Once the other nodes recceives the
- * message, they print the temperature and blink the LED for 1 second.
+ * For this exercise the SHT11 sensor is used instead of the Zoul sensor for temperature readings, since zoul sensors
+ * is not supported by sky mote.
+ * In here, the nodes with temperature sensors (even nodes) measure the temperature using sht11_sensor.value(SHT11_SENSOR_TEMP)
+ * and package the data into a temperatureMessage struct. This is sent to other nodes by broadcasting it. Once the other nodes 
+ * recceives the message, they print the temperature and blink the LED for 1 second.
  * 
- * Modified Program:*/ 
+ * Modified Program: Using Zoul*/  
 // #include "contiki.h"
 // #include <stdio.h> /* For printf() */
 // #include "etimer.h"
