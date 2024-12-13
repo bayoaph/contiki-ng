@@ -29,12 +29,12 @@ PROCESS_THREAD(button_press_process, ev, data)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-     // MODIFIED: Blink the LED
-    leds_on(LEDS_BLUE);            // Turn the LED on
+     // Blink the LED
+    leds_on(LEDS_RED);            // Turn the LED on
     clock_delay(400);              // Short delay for LED blink
-    leds_off(LEDS_BLUE);           // Turn the LED off
+    leds_off(LEDS_RED);           // Turn the LED off
 
-    // MODIFIED: Print "button pressed" to the serial interface
+    // Print "button pressed" to the serial interface
     printf("button pressed\n");
 
     printf("Temperature: ");
@@ -62,9 +62,23 @@ AUTOSTART_PROCESSES(&button_press_process);
 /* Exercise 2b: alter the program such that whenever the button is pressed, the led
  * blinks and the string "button pressed" is printed
  */
+ //ANSWER:
+ //Apparently, since the  blue led doesn't work, I used red led instead. I opened to window interface
+ //in order to show the button and the led. After running the simulation and clicking the button,
+ //the red led blinked and the text "button pressed" was displayed in the mote output as well as the 
+ //corresponding temperature.
+  // Blink the LED
+  //  leds_on(LEDS_RED);            // Turn the LED on
+  //  clock_delay(400);              // Short delay for LED blink
+  //  leds_off(LEDS_RED);           // Turn the LED off
+
+    // Print "button pressed" to the serial interface
+  //  printf("button pressed\n");
 
 /*
  * Exercise 2c: read out the temperature from the temperature
  * sensor when the button is pressed. print the temperature to the serial interface by
  * passing the value read from the sensor to print_temperature_int_to_float().
  */
+ //ANSWER:
+ //When the button is pressed, a Temperature of 6.360C was printed, displayed in the Mote output
