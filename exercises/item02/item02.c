@@ -33,18 +33,19 @@ PROCESS_THREAD(button_press_process, ev, data)
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
     // Exercise 2b: Blink led and print text
-    printf("button pressed");
+    printf("button pressed\n");
 
     leds_on(LEDS_GREEN);
-    etimer_set(&timer_blink, CLOCK_SECOND * 1);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
-
+    
     // Exercise 2c: Read temp from sensor
     printf("Temperature: ");
-    SENSORS_ACTIVATE(cc2538_temp_sensor);
-    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-    SENSORS_DEACTIVATE(cc2538_temp_sensor);
+    SENSORS_ACTIVATE(sht11_sensor);
+    print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
+    SENSORS_DEACTIVATE(sht11_sensor);
 
+    // Add short delay for led to simulate blink
+    etimer_set(&timer_blink, CLOCK_SECOND * 0.1);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
     leds_off(LEDS_GREEN);
   }
 
