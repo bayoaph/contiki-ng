@@ -32,6 +32,8 @@ void print_temperature_int_to_float(uint16_t temp)
   printf("%u.%03u", temp / 1000, temp % 1000);
 }
 
+static struct simple_udp_connection udp_connection;
+static struct ctimer leds_off_timer_send;
 static void timerCallback_turnOffLeds();
 // Handle incoming packets
 static void 
@@ -56,7 +58,6 @@ udp_recv_callback(struct simple_udp_connection *c,
   
   };
 
-static struct ctimer leds_off_timer_send;
 
 /* Timer callback turns off the blue led */
 static void timerCallback_turnOffLeds()
@@ -75,7 +76,6 @@ static void broadcast_send(struct temperatureMessage *payload) {
 /*---------------------------------------------------------------------------*/
 // static const struct broadcast_callbacks broadcast_call = {recv_bc};
 // static struct broadcast_conn bc;
-static struct simple_udp_connection udp_connection;
 /*---------------------------------------------------------------------------*/
 /* one timer struct declaration/instantiation */
 static struct etimer et;
@@ -86,7 +86,7 @@ PROCESS(broadcast_rssi_process, "Broadcast RSSI");
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(broadcast_rssi_process, ev, data)
 {
-  PROCESS_EXITHANDLER(broadcast_close(&bc);)
+  // PROCESS_EXITHANDLER(broadcast_close(&bc);)
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(sht11_sensor);
@@ -121,7 +121,7 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
     tm.temperature = temperature;
 
     // Copy the temperature struct in the packet buffer
-    packetbuf_copyfrom(&tm, sizeof(tm));
+    // packetbuf_copyfrom(&tm, sizeof(tm));
 
     /* send the packet */
     // broadcast_send(&bc);
