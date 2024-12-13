@@ -4,15 +4,19 @@
 #include "contiki.h"
 #include <stdio.h>
 #include <string.h>
-#include "node-id.h" /* get the variable node_id that holds the own node id */
+#include "node-id.h"
 #include "dev/leds.h"
 #include "lib/random.h"
-#include "dev/button-sensor.h" /* for the button sensor */
+#include "dev/button-sensor.h"
+
 /*---------------------------------------------------------------------------*/
 PROCESS(A_PROCESS, "A");
+PROCESS(B_PROCESS, "B");
+PROCESS(C_PROCESS, "C");
+AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS);
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(A_PROCESS, ev, data)
-{
+
+PROCESS_THREAD(A_PROCESS, ev, data) {
   PROCESS_BEGIN();
   static struct etimer et;
 
@@ -20,69 +24,77 @@ PROCESS_THREAD(A_PROCESS, ev, data)
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   static uint16_t localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", (void *)&localVariable);
 
   SENSORS_ACTIVATE(button_sensor);
-  while (1)
-  {
+  while (1) {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", (void *)&localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
 }
 
 /*---------------------------------------------------------------------------*/
-PROCESS(B_PROCESS, "B");
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(B_PROCESS, ev, data)
-{
+
+PROCESS_THREAD(B_PROCESS, ev, data) {
   PROCESS_BEGIN();
   static struct etimer et;
-  while (1)
-  {
+  while (1) {
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    printf("B: %u (address=%p)\n", randomNum, (void *)&randomNum);
   }
   PROCESS_END();
 }
 
 /*---------------------------------------------------------------------------*/
-PROCESS(C_PROCESS, "C");
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(C_PROCESS, ev, data)
-{
+
+PROCESS_THREAD(C_PROCESS, ev, data) {
   PROCESS_BEGIN();
+  static struct etimer et;
   static uint16_t inc;
-  while (1)
-  {
-    if (inc % 10000 == 0)
+  while (1) {
+    if (inc % 10000 == 0) {
       printf("C: i %u\n", inc);
+    }
     inc++;
-    // Temporarily give the processor to another protothread
     PROCESS_PAUSE();
+
+    // Introduce a delay to allow other protothreads to execute
+    etimer_set(&et, CLOCK_SECOND / 10); // Adjust frequency of yielding
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   }
   PROCESS_END();
 }
-
-AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
 
 /* Exercise 5 (to be solved with ILIAS):
  *
  * a) In the process A, a variable "localVariable" is declared and printed out 10s after
  * the node boots with the value 100.
- *
+ *k
  * Node B keeps looping and printing random numbers
  *
  * When you press the "user" button, the process A again prints the value of the "localVariable"
  *
  * What value does it have when you run the program a) before the button sensor event and b) after ? why is it like this? explain.
+ * 
+ * a. The value that the "localVariable" have is 100 before the button sensor event. This is because "localVariable is declared as 
+ * static variable where its value remains the same."
+ * 
+ * b. After the button is clicked, its value remains the same as 100. As mentioned on my previous answer, the "localVariable" is 
+ * declared as a static. The value stored in memory does not change hence its value is still 100.
+ * 
+ * c. Static variables in C are stored in the data segment no in memory. They are only initialized once and retain their value 
+ * for the lifetime of the program regardless of how many times the function of process is invoked.
  *
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
+ * 
+ * To ensure that the value of the variable "localVariable" is always 100, we need to ensure that it is not modified in the code.
+ * If there are any cases where it will be modified, ensure that its value is reinitialize back to 100.
  *
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
