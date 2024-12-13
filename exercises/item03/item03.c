@@ -128,28 +128,6 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
  * };
  *
  * containing the string (messageString) and the current temperature (temperature).
- * Attention: watch out how you write into the temperatureMessage.messageString field in the C programming language...
- *
- * When received by the other node, let the receiver print the transmitted temperature to the serial port
- * AND let it blink with the blue LED for 1 second!
- *
- *
- */
-
-/* Exercise 3a: flash the program to your nodes and observe what happens. Read the code and understand it thoroughly.
- */
-
-/* Exercise 3b (to be solved in ILIAS): for the node with the temperature sensor, read out the temperature value
- * in each loop. Then, send it to the other node using the broadcast function. Use the defined struct "temperatureMessage".
- * Learn how to define and instantiate structs in C on the internet. Replace the payload "helloMessage" entirely with
- * an instance of the struct temperatureMessage defined on line 11
- *
- * struct temperatureMessage {
- *	char messageString[50];
- *	uint16_t temperature;
- * };
- *
- * containing the string (messageString) and the current temperature (temperature).
  * Attention: watch out how you w0rite into the temperatureMessage.messageString field in the C programming language...
  *
  * When received by the other node, let the receiver print the transmitted temperature to the serial port
