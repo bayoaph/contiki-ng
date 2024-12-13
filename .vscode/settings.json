@@ -2,6 +2,9 @@
   "C_Cpp.errorSquiggles": "disabled",
   "files.associations": {
     "zoul-sensors.h": "c",
-    "node-id.h": "c"
+    "node-id.h": "c",
+    "sht25.h": "c",
+    "leds.h": "c",
+    "sht11-arch.h": "c"
   }
 }
