@@ -83,14 +83,7 @@ PROCESS_THREAD(example_unicast_process, ev, data) {
     tmSent.originator = node_id;
 
     uip_ipaddr_t addr;
-    if (node_id % 2 == 0)
-    {
-      uip_create_linklocal_allnodes_mcast(&addr);
-    }
-    else
-    {
-      uip_create_linklocal_allnodes_mcast(&addr);
-    }
+    uip_create_linklocal_allnodes_mcast(&addr);
 
     simple_udp_sendto(&udp_conn, &tmSent, sizeof(tmSent), &addr);
 
