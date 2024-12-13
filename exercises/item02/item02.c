@@ -30,7 +30,7 @@ PROCESS_THREAD(button_press_process, ev, data)
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
     leds_on(LEDS_RED);
-    printf("button pressed");
+    printf("button pressed\n");
     printf("Temperature: ");
     
     print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
