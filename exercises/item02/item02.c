@@ -4,9 +4,10 @@
 
 #include <stdio.h> /* For printf() */
 #include <string.h>
-#include "zoul/dev/zoul-sensors.h"  /* for the temperature sensor */
-#include "z1/dev/button-sensors.h" /* for the button sensor */
-#include "node-id.h"           /* get the variable node_id that holds the own node id */
+#include "dev/sht11-sensor.h"  /* for the temperature sensor */
+#include "dev/button-sensor.h" /* for the button sensor */
+
+#include "sys/node-id.h"           /* get the variable node_id that holds the own node id */
 #include "dev/leds.h"
 /*---------------------------------------------------------------------------*/
 PROCESS(button_press_process, "Button Press Process");
@@ -23,6 +24,7 @@ PROCESS_THREAD(button_press_process, ev, data)
 
   SENSORS_ACTIVATE(button_sensor);
 
+
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
@@ -30,9 +32,9 @@ PROCESS_THREAD(button_press_process, ev, data)
     leds_on(LEDS_BLUE);
 
     printf("Temperature: ");
-    SENSORS_ACTIVATE(cc2538_temp_sensor);
-    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-    SENSORS_DEACTIVATE(cc2538_temp_sensor);
+    SENSORS_ACTIVATE(sht11_sensor);
+    print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
+    SENSORS_DEACTIVATE(sht11_sensor);
 
     leds_off(LEDS_BLUE);
   }
@@ -50,9 +52,7 @@ AUTOSTART_PROCESSES(&button_press_process);
 
 /* Exercise 2b: alter the program such that whenever the button is pressed, the led
  * blinks and the string "button pressed" is printed
- */
-
-/*
+/
  * Exercise 2c: read out the temperature from the temperature
  * sensor when the button is pressed. print the temperature to the serial interface by
  * passing the value read from the sensor to print_temperature_int_to_float().
