@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simconf version="2023090101">
   <simulation>
-    <title>My simulation</title>
-    <speedlimit>1.0</speedlimit>
+    <title>item01_exercise1d</title>
+    <speedlimit>2.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -17,7 +17,7 @@
     </events>
     <motetype>
       org.contikios.cooja.contikimote.ContikiMoteType
-      <description>Cooja Mote Type #1</description>
+      <description>Exercise1d</description>
       <source>[CONFIG_DIR]/item01.c</source>
       <commands>$(MAKE) -j$(CPUS) item01.cooja TARGET=cooja</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
@@ -39,7 +39,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="95.26757944884845" y="26.843210237737768" />
+          <pos x="67.099398372017" y="47.39867594382006" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.contikimote.interfaces.ContikiMoteID
@@ -56,7 +56,7 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 107.39310959195595 148.5970816020566</viewport>
+      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 133.00054693452998 129.91029459652722</viewport>
     </plugin_config>
     <bounds x="1" y="1" height="400" width="400" />
   </plugin>
@@ -67,7 +67,7 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <bounds x="400" y="160" height="240" width="412" z="1" />
+    <bounds x="400" y="160" height="240" width="1308" z="3" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.TimeLine
@@ -78,7 +78,7 @@
       <showLEDs />
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
-    <bounds x="0" y="471" height="166" width="812" z="3" />
+    <bounds x="0" y="781" height="166" width="1708" z="1" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Notes
@@ -86,6 +86,6 @@
       <notes>Enter notes here</notes>
       <decorations>true</decorations>
     </plugin_config>
-    <bounds x="400" y="0" height="160" width="412" z="2" />
+    <bounds x="400" y="0" height="160" width="1308" z="2" />
   </plugin>
 </simconf>
