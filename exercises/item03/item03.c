@@ -8,10 +8,18 @@
 // #include "net/rime.h" - outdated
 #include "net/ipv6/simple-udp.h"
 #include "dev/button-sensor.h"
+#include "../../main_contiki/arch/dev/sensor/sht11/sht11-sensor.h"
 #include "dev/leds.h"
 #include "dev/light.h"
 #include "node-id.h" /* get a pointer to the own node id */
-#include "dev/zoul-sensors.h"
+// #include "dev/zoul-sensors.h"
+#include "simple-udp.h"
+// #include "net/ip/uip.h"
+#include "net/ipv6/uiplib.h"
+
+
+#define UDP_PORT 1234
+#define BROADCAST_ADDR "ff02::1" // Link-local all nodes multicast address
 
 struct temperatureMessage
 {
@@ -44,9 +52,43 @@ static void timerCallback_turnOffLeds()
   leds_off(LEDS_BLUE);
 }
 
-/*---------------------------------------------------------------------------*/
-static const struct broadcast_callbacks broadcast_call = {recv_bc};
-static struct broadcast_conn bc;
+static void send_broadcast_packet(struct temperatureMessage *payload)
+{
+  uip_ipaddr_t broadcast_addr;
+
+  // Create a buffer to hold the serialized data
+  uint8_t buffer[sizeof(struct temperatureMessage)];
+  memcpy(buffer, payload, sizeof(struct temperatureMessage)); // Serialize
+
+  uiplib_ipaddrconv(BROADCAST_ADDR, &broadcast_addr);
+  // simple_udp_sendto(&udp_conn, buffer, strlen(buffer), &broadcast_addr);
+  simple_udp_sendto(&udp_conn, buffer, sizeof(buffer), &broadcast_addr);
+
+}
+
+// Callback function to handle incoming packets
+// static void udp_recv_callback(struct simple_udp_connection *c, const uip_ipaddr_t *sender_addr, const uint8_t *data, uint16_t datalen)
+// static void udp_recv_callback(struct simple_udp_connection *c, const union uip_ipaddr_t *sender_addr, uint16_t sender_port, const uint8_t *data, uint16_t datalen)
+static void udp_recv_callback(struct simple_udp_connection *c,
+                              const uip_ipaddr_t *sender_addr,
+                              uint16_t sender_port,
+                              const uip_ipaddr_t *receiver_addr,
+                              uint16_t receiver_port,
+                              const uint8_t *data,
+                              uint16_t datalen)
+{
+  struct temperatureMessage received_data;
+  memcpy(&received_data, data, sizeof(struct temperatureMessage)); // Deserialize
+
+  char sender_addr_str[UIPLIB_IPV6_MAX_STR_LEN];
+  uiplib_ipaddr_snprint(sender_addr_str, sizeof(sender_addr_str), sender_addr);
+
+  printf("Received Sensor Data: Message = %s, Temperature = %u\n", received_data.messageString, received_data.temperature);
+
+  leds_on(LEDS_RED);
+  ctimer_set(&leds_off_timer_send, CLOCK_SECOND, timerCallback_turnOffLeds, NULL);
+}
+
 /*---------------------------------------------------------------------------*/
 /* one timer struct declaration/instantiation */
 static struct etimer et;
@@ -63,13 +105,10 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
   SENSORS_ACTIVATE(sht11_sensor);
 
   printf("Starting broadcast\n");
-  /* every broadcast has to be initiated with broadcast_open, where the broadcast_conn struct
-   * are defined and the pointers to the callback, the function which has to be defined that is
-   * going to be called when RECEIVING the broadcast
-   */
-  broadcast_open(&bc, BROADCAST_CHANNEL, &broadcast_call);
-  /* Broadcast every 4 seconds */
-  etimer_set(&et, 4 * CLOCK_SECOND);
+  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback);
+
+      /* Broadcast every 4 seconds */
+      etimer_set(&et, 4 * CLOCK_SECOND);
 
   while (1)
   {
@@ -139,6 +178,9 @@ broadcast_recv(struct simple_udp_connection *c,
 
 /* Exercise 3a: flash the program to your nodes and observe what happens. Read the code and understand it thoroughly.
  */
+  /**************************************************************************************************
+  
+ **************************************************************************************************/
 
 /* Exercise 3b (to be solved in ILIAS): for the node with the temperature sensor, read out the temperature value
  * in each loop. Then, send it to the other node using the broadcast function. Use the defined struct "temperatureMessage".
@@ -158,3 +200,6 @@ broadcast_recv(struct simple_udp_connection *c,
  *
  *
  */
+  /**************************************************************************************************
+  
+ **************************************************************************************************/
