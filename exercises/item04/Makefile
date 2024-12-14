@@ -1,12 +1,12 @@
-CONTIKI_PROJECT = exercise4
-TARGET=sky
+CONTIKI_PROJECT = item04
+TARGET = z1
 all: $(CONTIKI_PROJECT)
 
-CFLAGS = -DWITH_UIP=1
+CFLAGS += -DWITH_UIP=1
 
-# DEFINES=NETSTACK_CONF_RDC=contikimac_driver,NETSTACK_CONF_MAC=csma_driver
-# DEFINES=NETSTACK_CONF_RDC=xmac_driver,NETSTACK_CONF_MAC=csma_driver
-DEFINES=NETSTACK_CONF_RDC=nullrdc_driver,NETSTACK_CONF_MAC=csma_driver
+# Specify the RDC and MAC layers explicitly for Z1
+DEFINES += NETSTACK_CONF_RDC=nullrdc_driver,NETSTACK_CONF_MAC=csma_driver
 
-CONTIKI = ../..
+# Path to the main Contiki directory
+CONTIKI = ../../main_contiki
 include $(CONTIKI)/Makefile.include
