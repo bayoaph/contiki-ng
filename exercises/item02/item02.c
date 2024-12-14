@@ -1,48 +1,58 @@
-
 /* Philipp Hurni, University of Bern, December 2013     */
 /* Modified for Zolertia Firefly - M. Cabilo, Apr 2019  */
 
-#include <stdio.h> /* For printf() */
-#include <string.h>
-#include "dev/button-sensor.h" /* for the button sensor */
-#include "dev/zoul-sensors.h"  /* for the temperature sensor */
-#include "node-id.h"           /* get the variable node_id that holds the own node id */
-#include "dev/leds.h"
+#include <stdio.h>          /* For printf() */
+#include "contiki.h"        /* Contiki core */
+#include "dev/leds.h"       /* LED control */
+#include "lib/random.h"     /* For simulated temperature values */
+
 /*---------------------------------------------------------------------------*/
 PROCESS(button_press_process, "Button Press Process");
+AUTOSTART_PROCESSES(&button_press_process);
 /*---------------------------------------------------------------------------*/
 
-void print_temperature_int_to_float(uint16_t temp)
-{
-  printf("%u.%uC\n", temp / 1000, temp % 1000);
+/* Simulated temperature function */
+int get_simulated_temperature() {
+  return 2000 + (random_rand() % 1000); // Simulates temperatures between 20.00°C and 29.99°C
 }
 
+/* Helper function to print temperature in a readable format */
+void print_temperature(int temp_raw) {
+  float temp = temp_raw / 100.0;
+  printf("Temperature: %.2f°C\n", temp);
+}
+
+/*---------------------------------------------------------------------------*/
 PROCESS_THREAD(button_press_process, ev, data)
 {
+  static struct etimer timer; // Timer for simulation and LED delay
   PROCESS_BEGIN();
 
-  SENSORS_ACTIVATE(button_sensor);
+  printf("Cooja Simulation: Press button to read temperature.\n");
 
-  while (1)
-  {
-    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+  while (1) {
+    /* Simulate button press at intervals (every 5 seconds) */
+    etimer_set(&timer, CLOCK_SECOND * 5);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
 
-    leds_on(LEDS_BLUE);
+    /* Simulate LED blink */
+    leds_on(LEDS_RED);
+    printf("LED ON: Button pressed!\n");
 
-    printf("Temperature: ");
-    SENSORS_ACTIVATE(cc2538_temp_sensor);
-    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-    SENSORS_DEACTIVATE(cc2538_temp_sensor);
+    /* Simulate temperature reading */
+    int temp = get_simulated_temperature();
+    print_temperature(temp);
 
-    leds_off(LEDS_BLUE);
+    /* Use etimer for a 500 ms delay */
+    etimer_set(&timer, CLOCK_SECOND / 2); // 500 ms delay
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+
+    leds_off(LEDS_RED);
+    printf("LED OFF\n");
   }
 
   PROCESS_END();
 }
-
-/*---------------------------------------------------------------------------*/
-AUTOSTART_PROCESSES(&button_press_process);
-/*---------------------------------------------------------------------------*/
 
 /* Exercise 2a: compile and run the program. press the button, observe what it does with
  * the serial interface

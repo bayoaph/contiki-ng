@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simconf version="2023090101">
   <simulation>
-    <title>exer2</title>
+    <title>exer1</title>
+    <speedlimit>20.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -17,8 +18,8 @@
     <motetype>
       org.contikios.cooja.contikimote.ContikiMoteType
       <description>Cooja Mote Type #1</description>
-      <source>[CONFIG_DIR]/item02.c</source>
-      <commands>$(MAKE) -j$(CPUS) item02.cooja TARGET=cooja</commands>
+      <source>[CONFIG_DIR]/item01.c</source>
+      <commands>$(MAKE) -j$(CPUS) item01.cooja TARGET=cooja</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiVib</moteinterface>
@@ -38,11 +39,21 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="82.79491927252288" y="25.356663808083123" />
+          <pos x="35.89363703596125" y="25.86920405758031" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.contikimote.interfaces.ContikiMoteID
           <id>1</id>
+        </interface_config>
+      </mote>
+      <mote>
+        <interface_config>
+          org.contikios.cooja.interfaces.Position
+          <pos x="73.98157201064966" y="32.46328303756873" />
+        </interface_config>
+        <interface_config>
+          org.contikios.cooja.contikimote.interfaces.ContikiMoteID
+          <id>2</id>
         </interface_config>
       </mote>
     </motetype>
@@ -55,7 +66,7 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 118.73189157043373 149.94848744719718</viewport>
+      <viewport>4.328952478743999 0.0 0.0 4.328952478743999 -98.82227927742068 -96.25928230092384</viewport>
     </plugin_config>
     <bounds x="1" y="1" height="400" width="400" />
   </plugin>
@@ -72,6 +83,7 @@
     org.contikios.cooja.plugins.TimeLine
     <plugin_config>
       <mote>0</mote>
+      <mote>1</mote>
       <showRadioRXTX />
       <showRadioHW />
       <showLEDs />

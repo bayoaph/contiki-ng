@@ -7,29 +7,34 @@
 #include "node-id.h" /* get the variable node_id that holds the own node id */
 #include "dev/leds.h"
 #include "lib/random.h"
-#include "dev/button-sensor.h" /* for the button sensor */
+
 /*---------------------------------------------------------------------------*/
 PROCESS(A_PROCESS, "A");
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(A_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
-  static struct etimer et;
+  static struct etimer periodic_timer;
+  static struct etimer init_timer;
 
-  etimer_set(&et, CLOCK_SECOND * 10);
-  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+  /* Initial delay */
+  etimer_set(&init_timer, CLOCK_SECOND * 10);
+  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&init_timer));
+
   static uint16_t localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", (void *)&localVariable);
 
-  SENSORS_ACTIVATE(button_sensor);
+  /* Periodic printing of localVariable instead of button press */
+  etimer_set(&periodic_timer, CLOCK_SECOND * 15);
   while (1)
   {
-    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", (void *)&localVariable);
+    etimer_reset(&periodic_timer);
   }
-  SENSORS_DEACTIVATE(button_sensor);
+
   PROCESS_END();
 }
 
@@ -45,7 +50,7 @@ PROCESS_THREAD(B_PROCESS, ev, data)
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    printf("B: %u (address=%p)\n", randomNum, (void *)&randomNum);
   }
   PROCESS_END();
 }
@@ -56,19 +61,20 @@ PROCESS(C_PROCESS, "C");
 PROCESS_THREAD(C_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
-  static uint16_t inc;
+  static uint16_t inc = 0;
   while (1)
   {
     if (inc % 10000 == 0)
       printf("C: i %u\n", inc);
     inc++;
-    // Temporarily give the processor to another protothread
-    PROCESS_PAUSE();
+    PROCESS_PAUSE(); // Allow other processes to execute
   }
   PROCESS_END();
 }
 
+/*---------------------------------------------------------------------------*/
 AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
+
 
 /* Exercise 5 (to be solved with ILIAS):
  *

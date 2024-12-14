@@ -1,108 +1,128 @@
 /* Based on exercises by Philipp Hurni, University of Bern, December 2013 */
+/* Modified for Zolertia Firefly and Contiki-NG - M. Cabilo, Apr 2019 */
 
 #include "contiki.h"
-#include <stdio.h> /* For printf() */
 #include "etimer.h"
+#include <stdio.h>
 #include <string.h>
-#include "dev/button-sensor.h"
 #include "dev/leds.h"
-#include "node-id.h" /* get a pointer to the own node id */
-#include "dev/zoul-sensors.h"
+#include "node-id.h"
 #include "simple-udp.h"
+#include "net/ipv6/uiplib.h"
+#include "random.h"
 
-#define UDP_PORT 1234
-#define BROADCAST_ADDR "ff02::1" // Link-local all nodes multicast address
-
-struct temperatureMessage
-{
+/*---------------------------------------------------------------------------*/
+/* Define message struct */
+struct temperatureMessage {
   char messageString[50];
   uint16_t temperature;
 };
 
+/*---------------------------------------------------------------------------*/
+/* Definitions */
+#define UDP_PORT 1234               // Port for UDP communication
+#define BROADCAST_ADDR "ff02::1"    // IPv6 broadcast address
+#define SEND_INTERVAL (4 * CLOCK_SECOND)  // 4-second broadcast interval
+
 static struct simple_udp_connection udp_conn;
-static struct ctimer leds_off_timer_send;
+static struct ctimer leds_off_timer;   // Timer to turn off LEDs
+static struct etimer et;              // Event timer
+static struct temperatureMessage tm;  // Message structure
 
-/* Timer callback turns off the blue led */
-static void timerCallback_turnOffLeds()
-{
-  leds_off(LEDS_BLUE);
+/*---------------------------------------------------------------------------*/
+/* Function Prototypes */
+static void turn_off_leds_callback();
+static void send_broadcast_packet(const struct temperatureMessage *payload);
+
+/*---------------------------------------------------------------------------*/
+/* LED callback: turns off yellow LED */
+static void turn_off_leds_callback() {
+  leds_off(LEDS_YELLOW);
 }
 
-static void send_broadcast_packet(struct temperatureMessage *payload)
-{
+/*---------------------------------------------------------------------------*/
+/* Send a broadcast UDP message */
+static void send_broadcast_packet(const struct temperatureMessage *payload) {
   uip_ipaddr_t broadcast_addr;
-
-  // Create a buffer to hold the serialized data
-  uint8_t buffer[sizeof(struct temperatureMessage)];
-  memcpy(buffer, payload, sizeof(struct temperatureMessage)); // Serialize
-
   uiplib_ipaddrconv(BROADCAST_ADDR, &broadcast_addr);
-  simple_udp_sendto(&udp_conn, buffer, strlen(buffer), &broadcast_addr);
+  simple_udp_sendto(&udp_conn, payload, sizeof(*payload), &broadcast_addr);
 }
 
-// Callback function to handle incoming packets
-static void udp_recv_callback(struct simple_udp_connection *c, const uip_ipaddr_t *sender_addr, const uint8_t *data, uint16_t datalen)
-{
+/*---------------------------------------------------------------------------*/
+/* UDP receive callback */
+static void udp_recv_callback(struct simple_udp_connection *c,
+                               const uip_ipaddr_t *sender_addr,
+                               uint16_t sender_port,
+                               const uip_ipaddr_t *receiver_addr,
+                               uint16_t receiver_port,
+                               const uint8_t *data,
+                               uint16_t datalen) {
   struct temperatureMessage received_data;
-  memcpy(&received_data, data, sizeof(struct temperatureMessage)); // Deserialize
+  memcpy(&received_data, data, sizeof(received_data));
 
-  printf("Received Sensor Data: Message = %s, Temperature = %u\n", received_data.messageString, received_data.temperature);
+  char sender_ip[UIPLIB_IPV6_MAX_STR_LEN];
+  uiplib_ipaddr_snprint(sender_ip, sizeof(sender_ip), sender_addr);
+
+  printf("Received message from [%s]: %u\n", sender_ip, sender_port);
+  printf("Message: %s, Temperature: %u\n", received_data.messageString, received_data.temperature);
+
+  /* Blink yellow LED for 1 second */
+  leds_on(LEDS_YELLOW);
+  ctimer_set(&leds_off_timer, CLOCK_SECOND, turn_off_leds_callback, NULL);
 }
 
 /*---------------------------------------------------------------------------*/
-/* one timer struct declaration/instantiation */
-static struct etimer et;
-/* one temperatureMessage struct declaration/instantiation  */
-static struct temperatureMessage tm;
-/*---------------------------------------------------------------------------*/
-PROCESS(broadcast_rssi_process, "Broadcast RSSI");
+/* Main process */
+PROCESS(broadcast_rssi_process, "Broadcast RSSI Process");
 AUTOSTART_PROCESSES(&broadcast_rssi_process);
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(broadcast_rssi_process, ev, data)
-{
-  // PROCESS_EXITHANDLER(broadcast_close(&bc);)
+
+PROCESS_THREAD(broadcast_rssi_process, ev, data) {
   PROCESS_BEGIN();
 
-  SENSORS_ACTIVATE(cc2538_temp_sensor);
+  /* Register UDP connection */
+  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback);
 
-  printf("Starting broadcast\n");
-  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback)
+  /* Sender node logic */
+  if (node_id == 1) {
+    printf("Node %u: Starting as sender\n", node_id);
+    
+    // Simulation: Replace SHT11 sensor with a mock sensor
+    etimer_set(&et, SEND_INTERVAL);
 
-      /* Broadcast every 4 seconds */
-      etimer_set(&et, 4 * CLOCK_SECOND);
+    while (1) {
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+      etimer_reset(&et);
 
-  while (1)
-  {
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    etimer_reset(&et);
+      /* Simulate reading temperature: Generate a random value between 200 and 300 */
+      uint16_t temperature = 200 + (random_rand() % 100); // Example temperature range [20.0, 30.0] degrees Celsius
 
-    // Temperature of 0 means no sensor, checked using node_id an even number
-    uint16_t temperature = (node_id % 2 == 0) ? cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED) : 0;
+      if (temperature == (uint16_t)-1) {
+        sprintf(tm.messageString, "Node %u: Temperature error", node_id);
+        tm.temperature = 0;
+      } else {
+        sprintf(tm.messageString, "Node %u: Temperature", node_id);
+        tm.temperature = temperature;  // Simulated value
+      }
 
-    // Send a different message, depending on the existence of a temperature sensor
-    if (node_id % 2 == 0)
-      sprintf(tm.messageString, "Here is node %u, sending the temperature", node_id);
-    else
-      sprintf(tm.messageString, "Here is node %u, I don't have a sensor", node_id);
+      /* Send broadcast */
+      send_broadcast_packet(&tm);
 
-    // Save the temperature into the struct
-    tm.temperature = temperature;
+      /* Indicate sending with yellow LED */
+      leds_on(LEDS_YELLOW);
+      ctimer_set(&leds_off_timer, CLOCK_SECOND, turn_off_leds_callback, NULL);
 
-    /* send the packet */
-    send_broadcast_packet(&tm);
+      printf("Node %u: Sent broadcast message\n", node_id);
+    }
 
-    /* turn on blue led */
-    leds_on(LEDS_BLUE);
-    /* set the timer "leds_off_timer" to 1 second */
-    ctimer_set(&leds_off_timer_send, CLOCK_SECOND, timerCallback_turnOffLeds, NULL);
-    printf("sent broadcast message\n");
+  } else {
+    /* Receiver node logic */
+    printf("Node %u: Starting as receiver\n", node_id);
   }
-
-  SENSORS_DEACTIVATE(cc2538_temp_sensor);
 
   PROCESS_END();
 }
 
+/*---------------------------------------------------------------------------*/
 /* Exercise 3a: flash the program to your nodes and observe what happens. Read the code and understand it thoroughly.
  */
 

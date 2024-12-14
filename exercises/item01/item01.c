@@ -21,11 +21,11 @@ PROCESS_THREAD(led_blink_process, ev, data)
 
   while (1)
   {
-    leds_on(LEDS_BLUE);
+    leds_on(LEDS_YELLOW);
     etimer_set(&timer_blink, CLOCK_SECOND * 1);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_blink));
 
-    leds_off(LEDS_BLUE);
+    leds_off(LEDS_YELLOW);
     etimer_set(&timer_wait, CLOCK_SECOND * 3);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer_wait));
   }
