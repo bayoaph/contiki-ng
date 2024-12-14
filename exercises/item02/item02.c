@@ -2,49 +2,51 @@
 /* Philipp Hurni, University of Bern, December 2013     */
 /* Modified for Zolertia Firefly - M. Cabilo, Apr 2019  */
 
-// #include <stdio.h> /* For printf() */
-// #include <string.h>
-// #include "dev/button-sensor.h" /* for the button sensor */
-// #include "dev/zoul-sensors.h"  /* for the temperature sensor */
-// #include "sys/node-id.h"  /* get the variable node_id that holds the own node id */
-// #include "dev/leds.h"
-// /*---------------------------------------------------------------------------*/
-// PROCESS(button_press_process, "Button Press Process");
-// /*---------------------------------------------------------------------------*/
+// For simulation (Using sky mote):
+#include <stdio.h> /* For printf() */
+#include "dev/button-sensor.h" /* for the button sensor */
+#include "dev/sht11/sht11-sensor.h"  /* for the temperature sensor */
+#include "sys/node-id.h"  /* get the variable node_id that holds the own node id */
+#include "dev/leds.h"
 
-// void print_temperature_int_to_float(uint16_t temp)
-// {
-//   printf("%u.%uC\n", temp / 1000, temp % 1000);
-// }
+/*---------------------------------------------------------------------------*/
+PROCESS(button_press_process, "Button Press Process");
+/*---------------------------------------------------------------------------*/
 
-// PROCESS_THREAD(button_press_process, ev, data)
-// {
-//   PROCESS_BEGIN();
+void print_temperature_int_to_float(uint16_t temp)
+{
+  printf("%u.%uC\n", temp / 10, temp % 10);  // SHT11 reports in tenths of degrees 
+}
 
-//   SENSORS_ACTIVATE(button_sensor);
+PROCESS_THREAD(button_press_process, ev, data)
+{
+  PROCESS_BEGIN();
 
-//   while (1)
-//   {
-//     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+  SENSORS_ACTIVATE(button_sensor);
+  SENSORS_ACTIVATE(sht11_sensor);
 
-//     leds_on(LEDS_YELLOW);
-//     //printf("button pressed\n");  // For Exercise 2b
+  while (1)
+  {
+    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-//     printf("Temperature: ");
-//     SENSORS_ACTIVATE(cc2538_temp_sensor);
-//     print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-//     SENSORS_DEACTIVATE(cc2538_temp_sensor);
+    leds_on(LEDS_GREEN);
 
-//     leds_off(LEDS_YELLOW);
-//     leds_off(LEDS_YELLOW);
-//   }
+    printf("Temperature: ");
+    print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
 
-//   PROCESS_END();
-// }
+    leds_off(LEDS_GREEN);
+  }
 
-// /*---------------------------------------------------------------------------*/
-// AUTOSTART_PROCESSES(&button_press_process);
-// /*---------------------------------------------------------------------------*/
+  SENSORS_DEACTIVATE(sht11_sensor);
+  SENSORS_DEACTIVATE(button_sensor);
+
+  PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
+AUTOSTART_PROCESSES(&button_press_process);
+/*---------------------------------------------------------------------------*/
+
 
 /* Exercise 2a: compile and run the program. press the button, observe what it does with
  * the serial interface
@@ -197,50 +199,47 @@ AUTOSTART_PROCESSES(&button_press_process);
 */
 
 
+// original code:
+// #include <stdio.h> /* For printf() */
+// #include <string.h>
+// #include "dev/button-sensor.h" /* for the button sensor */
+// #include "dev/zoul-sensors.h"  /* for the temperature sensor */
+// #include "sys/node-id.h"  /* get the variable node_id that holds the own node id */
+// #include "dev/leds.h"
+// /*---------------------------------------------------------------------------*/
+// PROCESS(button_press_process, "Button Press Process");
+// /*---------------------------------------------------------------------------*/
 
+// void print_temperature_int_to_float(uint16_t temp)
+// {
+//   printf("%u.%uC\n", temp / 1000, temp % 1000);
+// }
 
-// For simulation (Using sky mote):
-#include <stdio.h> /* For printf() */
-#include "dev/button-sensor.h" /* for the button sensor */
-#include "dev/sht11/sht11-sensor.h"  /* for the temperature sensor */
-#include "sys/node-id.h"  /* get the variable node_id that holds the own node id */
-#include "dev/leds.h"
+// PROCESS_THREAD(button_press_process, ev, data)
+// {
+//   PROCESS_BEGIN();
 
-/*---------------------------------------------------------------------------*/
-PROCESS(button_press_process, "Button Press Process");
-/*---------------------------------------------------------------------------*/
+//   SENSORS_ACTIVATE(button_sensor);
 
-void print_temperature_int_to_float(uint16_t temp)
-{
-  printf("%u.%uC\n", temp / 10, temp % 10);  // SHT11 reports in tenths of degrees
-}
+//   while (1)
+//   {
+//     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-PROCESS_THREAD(button_press_process, ev, data)
-{
-  PROCESS_BEGIN();
+//     leds_on(LEDS_YELLOW);
+//     //printf("button pressed\n");  // For Exercise 2b
 
-  SENSORS_ACTIVATE(button_sensor);
-  SENSORS_ACTIVATE(sht11_sensor);
+//     printf("Temperature: ");
+//     SENSORS_ACTIVATE(cc2538_temp_sensor);
+//     print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
+//     SENSORS_DEACTIVATE(cc2538_temp_sensor);
 
-  while (1)
-  {
-    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+//     leds_off(LEDS_YELLOW);
+//     leds_off(LEDS_YELLOW);
+//   }
 
-    leds_on(LEDS_GREEN);
+//   PROCESS_END();
+// }
 
-    printf("Temperature: ");
-    print_temperature_int_to_float(sht11_sensor.value(SHT11_SENSOR_TEMP));
-
-    leds_off(LEDS_GREEN);
-  }
-
-  SENSORS_DEACTIVATE(sht11_sensor);
-  SENSORS_DEACTIVATE(button_sensor);
-
-  PROCESS_END();
-}
-
-/*---------------------------------------------------------------------------*/
-AUTOSTART_PROCESSES(&button_press_process);
-/*---------------------------------------------------------------------------*/
-
+// /*---------------------------------------------------------------------------*/
+// AUTOSTART_PROCESSES(&button_press_process);
+// /*---------------------------------------------------------------------------*/
