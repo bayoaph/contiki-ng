@@ -20,14 +20,14 @@ PROCESS_THREAD(A_PROCESS, ev, data)
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   static uint16_t localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", &localVariable);
 
   SENSORS_ACTIVATE(button_sensor);
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", &localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
@@ -45,7 +45,7 @@ PROCESS_THREAD(B_PROCESS, ev, data)
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    printf("B: %u (address=%p)\n", randomNum, &randomNum);
   }
   PROCESS_END();
 }
@@ -56,14 +56,17 @@ PROCESS(C_PROCESS, "C");
 PROCESS_THREAD(C_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
+  static struct etimer et;
   static uint16_t inc;
   while (1)
   {
     if (inc % 10000 == 0)
       printf("C: i %u\n", inc);
     inc++;
-    // Temporarily give the processor to another protothread
-    PROCESS_PAUSE();
+    
+    // Set a timer to yield control
+    etimer_set(&et, CLOCK_SECOND / 10); //  you may adjust this accdg to your liking of frequency of yielding
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   }
   PROCESS_END();
 }
@@ -81,17 +84,53 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  *
  * What value does it have when you run the program a) before the button sensor event and b) after ? why is it like this? explain.
  *
+ * a. Before the button sensor event, localVariable is 100 because it is a static variable, 
+ *    initialized to 100 and retains its value and memory location. 
+ * 
+ * b. After the button sensor event, localVariable remains 100 since static variables preserve 
+ *    their value between events unless explicitly changed.
+ * 
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
+ * 
+ * Answer:
+ *    To ensure localVariable is always 100, it must be declared as a static variable to retain their value across context switches
  *
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
  * Let it start at boot time. Observe what happens.
- *
+ * 
+ * Answer:
+ *    Protothread C_PROCESS continuously increments the variable inc without yielding control. 
+ *    Even though it calls PROCESS_PAUSE(), it consumes significant CPU cycles and prevents other 
+ *    processes from executing properly.
+ * 
  * Protothread C eats up all CPU. Since it never returns control to the event handler, it monopolizes the CPU.
  *
  * As a programmer, you can solve such tasks in separate protothreads, while still being able to serve other protothreads.
  *
  * Find a solution to let C use the CPU while A and B are still being served. Check your final code with a Cooja simulator.
+ * 
+ * Answer:
+ * 
+ *  introduce an etimer in C_PROCESS to allow the scheduler to handle other processes periodically
+ * 
+PROCESS_THREAD(C_PROCESS, ev, data)
+{
+  PROCESS_BEGIN();
+  static struct etimer et;
+  static uint16_t inc;
+  while (1)
+  {
+    if (inc % 10000 == 0)
+      printf("C: i %u\n", inc);
+    inc++;
+    
+    // Set a timer to yield control
+    etimer_set(&et, CLOCK_SECOND / 10); //  you may adjust this accdg to your liking of frequency of yielding
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+  }
+  PROCESS_END();
+}
  *
  */
