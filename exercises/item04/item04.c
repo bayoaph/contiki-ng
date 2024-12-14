@@ -1,12 +1,11 @@
 #include "contiki.h"
 #include "net/netstack.h"
 #include "net/ipv6/simple-udp.h"
-#include "net/ipv6/uip-debug.h" 
+#include "net/ipv6/uip-debug.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
 #include "sys/node-id.h"
 #include <stdio.h>
-
 
 #define UDP_PORT 1234
 
@@ -25,10 +24,51 @@ void print_temperature_binary_to_float(uint16_t temp) {
 
 static struct ctimer leds_off_timer_send;
 
-/* Timer callback turns off the blue led */
+/* Timer callback turns off the blue LED */
 static void timerCallback_turnOffLeds() {
-  leds_off(LEDS_BLUE);
+  leds_off(LEDS_GREEN);
 }
+
+
+/* Function to construct an IPv6 address based on node_id */
+void construct_ipv6_address(uip_ipaddr_t *addr, uint16_t node_id) {
+  linkaddr_t receiver_node_linkaddr;
+
+  // Copy part of the link-layer address to the receiver node's link address
+  // these copied bytes are used to retain essential parts of the address (likely the node's identifier portion)
+  receiver_node_linkaddr.u8[0] = linkaddr_node_addr.u8[0];
+  receiver_node_linkaddr.u8[2] = linkaddr_node_addr.u8[2];
+  receiver_node_linkaddr.u8[4] = linkaddr_node_addr.u8[4];
+
+  // Define the byte indices to modify
+  int modify_bytes[] = {1, 3, 5, 6, 7};
+
+  // Modify the address based on whether the node_id is even or odd
+  for (int i = 0; i < sizeof(modify_bytes)/sizeof(modify_bytes[0]); i++) {
+    if (node_id % 2 == 0) {
+      // For even node_id, increment some parts and decrement others
+      if (i == 0) receiver_node_linkaddr.u8[modify_bytes[i]] = linkaddr_node_addr.u8[modify_bytes[i]] + 1; // Increment the 1st byte
+      else receiver_node_linkaddr.u8[modify_bytes[i]] = linkaddr_node_addr.u8[modify_bytes[i]] - 1; // Decrement others
+    } else {
+      // For odd node_id, decrement some parts and increment others
+      if (i == 0) receiver_node_linkaddr.u8[modify_bytes[i]] = linkaddr_node_addr.u8[modify_bytes[i]] - 1; // Decrement the 1st byte
+      else receiver_node_linkaddr.u8[modify_bytes[i]] = linkaddr_node_addr.u8[modify_bytes[i]] + 1; // Increment others
+    }
+  }
+
+  // Combine parts of the link address to form the IPv6 address
+  uip_ip6addr(addr, 0xfe80, 0, 0, 0, 0x212,
+              (receiver_node_linkaddr.u8[2] << 8) | receiver_node_linkaddr.u8[3], 
+              (receiver_node_linkaddr.u8[4] << 8) | receiver_node_linkaddr.u8[5], 
+              (receiver_node_linkaddr.u8[6] << 8) | receiver_node_linkaddr.u8[7]); 
+
+  // Print the generated IPv6 address for debugging
+  printf("Generated IPv6 address: ");
+  uip_debug_ipaddr_print(addr);
+  printf("\n");
+}
+
+
 
 static void udp_rx_callback(struct simple_udp_connection *c,
                             const uip_ipaddr_t *sender_addr,
@@ -43,7 +83,7 @@ static void udp_rx_callback(struct simple_udp_connection *c,
   printf("\n");
 
   printf("UDP message received\n");
-  leds_on(LEDS_BLUE);
+  leds_on(LEDS_GREEN);
   ctimer_set(&leds_off_timer_send, CLOCK_SECOND / 8, timerCallback_turnOffLeds, NULL);
 
   if (datalen == sizeof(tmReceived)) {
@@ -88,17 +128,12 @@ PROCESS_THREAD(example_udp_process, ev, data) {
     tmSent.time = clock_time();
     tmSent.originator = node_id;
 
-    if (node_id % 2 == 0) {
-      uip_ip6addr(&addr, 0xfe80, 0, 0, 0, 0, 0, 0, node_id + 1);
-    } else {
-      uip_ip6addr(&addr, 0xfe80, 0, 0, 0, 0, 0, 0, node_id + 1); // Use a valid neighbor ID
-    }
-
+    /* Construct IPv6 address */
+    construct_ipv6_address(&addr, node_id);
 
     printf("Node %u attempting to send to ", node_id);
     uip_debug_ipaddr_print(&addr);
     printf("\n");
-
 
     simple_udp_sendto(&udp_conn, &tmSent, sizeof(tmSent), &addr);
     printf("Sending packet to peer\n");
@@ -107,6 +142,7 @@ PROCESS_THREAD(example_udp_process, ev, data) {
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
 }
+
 
 
 /*---------------------------------------------------------------------------*/
@@ -124,6 +160,16 @@ PROCESS_THREAD(example_udp_process, ev, data) {
  * Your task: alter the program above such that the node where the USER button is pressed sends a
  * packet with its timestamp (is already done above) and THEN gets back a unicast packet with the
  * timestamp it has initially written into the first packet.
+ * 
+ * Answer:
+ * The code demonstrates UDP communication between two nodes in Contiki OS using simple udp library. 
+ * When a button is pressed, a node sends a packet with its timestamp and originator ID to another node. 
+ * The receiving node processes the packet, calculates the round-trip time (RTT) by comparing the current 
+ * time with the received timestamp, and sends the same packet back to the sender. This forms a unicast 
+ * message exchange, where the sender receives the same timestamp it initially sent. The task is to ensure 
+ * the sender sends its timestamp and receives a response with the same timestamp, which is already 
+ * implemented in the code. The RTT is printed in milliseconds.
+ * 
  */
 
 
@@ -156,7 +202,7 @@ PROCESS_THREAD(example_udp_process, ev, data) {
 // /* Timer callback turns off the blue led */
 // static void timerCallback_turnOffLeds()
 // {
-//   leds_off(LEDS_BLUE);
+//   leds_off(LEDS_GREEN);
 // }
 
 // /*---------------------------------------------------------------------------*/
@@ -179,7 +225,7 @@ PROCESS_THREAD(example_udp_process, ev, data) {
 
 //   printf("unicast message received from %d.%d\n", from->u8[0], from->u8[1]);
 //   /* turn on blue led */
-//   leds_on(LEDS_BLUE);
+//   leds_on(LEDS_GREEN);
 //   /* set the timer "leds_off_timer" to 1/8 second */
 //   ctimer_set(&leds_off_timer_send, CLOCK_SECOND / 8, timerCallback_turnOffLeds, NULL);
 
