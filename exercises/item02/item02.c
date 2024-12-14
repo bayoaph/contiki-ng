@@ -15,7 +15,7 @@ PROCESS(button_press_process, "Button Press Process");
 
 void print_temperature_int_to_float(uint16_t temp)
 {
-  printf("%u.%uC\n", temp / 1000, temp % 1000);
+  printf("%u.%uC\n", temp / 10, temp % 10);
 }
 
 PROCESS_THREAD(button_press_process, ev, data)

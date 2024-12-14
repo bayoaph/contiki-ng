@@ -38,7 +38,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="89.3296231095573" y="75.69849067104954" />
+          <pos x="93.21923102558475" y="65.55738527503784" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -55,7 +55,7 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 112.79125171858428 104.18319029904588</viewport>
+      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 109.25524452219568 113.40237702269287</viewport>
     </plugin_config>
     <bounds x="1" y="1" height="400" width="400" z="2" />
   </plugin>
@@ -66,7 +66,7 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <bounds x="400" y="160" height="240" width="716" z="3" />
+    <bounds x="400" y="160" height="240" width="632" z="1" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.TimeLine
@@ -77,7 +77,7 @@
       <showLEDs />
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
-    <bounds x="0" y="454" height="166" width="490" z="5" />
+    <bounds x="0" y="454" height="166" width="490" z="4" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Notes
@@ -85,16 +85,7 @@
       <notes>Enter notes here</notes>
       <decorations>true</decorations>
     </plugin_config>
-    <bounds x="400" y="0" height="160" width="566" z="4" />
-  </plugin>
-  <plugin>
-    org.contikios.cooja.plugins.MoteInterfaceViewer
-    <mote_arg>0</mote_arg>
-    <plugin_config>
-      <interface>Leds</interface>
-      <scrollpos>0,0</scrollpos>
-    </plugin_config>
-    <bounds x="877" y="191" height="300" width="350" z="1" />
+    <bounds x="400" y="0" height="160" width="90" z="3" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.MoteInterfaceViewer
