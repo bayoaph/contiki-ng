@@ -1,40 +1,66 @@
 
 /* Philipp Hurni, University of Bern, December 2013     */
 /* Modified for Zolertia Firefly - M. Cabilo, Apr 2019  */
-
-#include <stdio.h> /* For printf() */
-#include <string.h>
-#include "dev/button-sensor.h" /* for the button sensor */
-#include "dev/zoul-sensors.h"  /* for the temperature sensor */
-#include "node-id.h"           /* get the variable node_id that holds the own node id */
+#include "contiki.h"
+#include "dev/button-sensor.h"  /* for the button sensor */
+#include "dev/sht25.h"  /* for the SHT25 temperature sensor */
 #include "dev/leds.h"
+#include <stdio.h>  /* For printf() */
+
 /*---------------------------------------------------------------------------*/
 PROCESS(button_press_process, "Button Press Process");
 /*---------------------------------------------------------------------------*/
 
-void print_temperature_int_to_float(uint16_t temp)
+// Helper function to display temperature in a readable format
+static void print_temp_in_celsius(int16_t temp_in_tenths)
 {
-  printf("%u.%uC\n", temp / 1000, temp % 1000);
+  printf("Temperature: %d.%d°C\n", temp_in_tenths / 10, temp_in_tenths % 10);
 }
 
+// Helper function to manage LED blinking
+static void blink_led(uint8_t led_color, clock_time_t duration)
+{
+  leds_on(led_color);
+  clock_wait(duration);  // Wait for the specified duration
+  leds_off(led_color);
+}
+
+// Function to handle the temperature sensor reading
+static void read_and_print_temperature(void)
+{
+  printf("Reading temperature...\n");
+  
+  SENSORS_ACTIVATE(sht25);
+  int16_t temp_value = sht25.value(SHT25_VAL_TEMP);
+  if (temp_value == -1)
+  {
+    printf("Error: Unable to read temperature.\n");
+  }
+  else
+  {
+    print_temp_in_celsius(temp_value);  // Print the formatted temperature
+  }
+  SENSORS_DEACTIVATE(sht25);
+}
+
+// Event-driven button press handling function
 PROCESS_THREAD(button_press_process, ev, data)
 {
   PROCESS_BEGIN();
 
+  // Activate the button sensor for event-based detection
   SENSORS_ACTIVATE(button_sensor);
 
   while (1)
   {
-    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
+    PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor); // Wait for button press event
 
-    leds_on(LEDS_BLUE);
+    printf("Button pressed\n");
+    
+    // Blink LED and read temperature
+    blink_led(LEDS_GREEN, CLOCK_SECOND);  // Blink the LED for 1 second (color could be changed)
+    read_and_print_temperature();  // Read and print temperature from sensor
 
-    printf("Temperature: ");
-    SENSORS_ACTIVATE(cc2538_temp_sensor);
-    print_temperature_int_to_float(cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
-    SENSORS_DEACTIVATE(cc2538_temp_sensor);
-
-    leds_off(LEDS_BLUE);
   }
 
   PROCESS_END();
