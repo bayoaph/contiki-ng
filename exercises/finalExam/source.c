@@ -41,7 +41,7 @@ static void send_temperature_packet(void) {
     int fractional_part = raw_temperature % 100;
     fractional_part = fractional_part < 0 ? -fractional_part : fractional_part;
 
-    printf("Broadcasted Temperature: %d.%02d°C\n", integer_part, fractional_part);
+    printf("Broadcasted Temperature: %d.%02dC\n", integer_part, fractional_part);
 }
 
 PROCESS_THREAD(temperature_broadcast_process, ev, data) {

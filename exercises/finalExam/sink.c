@@ -39,7 +39,7 @@ static void display_temperature(const TempMsg *msg) {
         frac_part = -frac_part;
     }
 
-    printf("Received Temperature: %d.%02d°C\n", whole_part, frac_part);
+    printf("Received Temperature: %d.%02dC\n", whole_part, frac_part);
 }
 
 static void udp_message_handler(struct simple_udp_connection *conn,
