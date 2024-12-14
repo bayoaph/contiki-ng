@@ -20,14 +20,14 @@ PROCESS_THREAD(A_PROCESS, ev, data)
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   static uint16_t localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", &localVariable);
 
   SENSORS_ACTIVATE(button_sensor);
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", &localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
@@ -45,7 +45,7 @@ PROCESS_THREAD(B_PROCESS, ev, data)
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    printf("B: %u (address=%p)\n", randomNum, &randomNum);
   }
   PROCESS_END();
 }
@@ -57,12 +57,13 @@ PROCESS_THREAD(C_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
   static uint16_t inc;
+
   while (1)
   {
     if (inc % 10000 == 0)
       printf("C: i %u\n", inc);
     inc++;
-    // Temporarily give the processor to another protothread
+
     PROCESS_PAUSE();
   }
   PROCESS_END();
@@ -80,10 +81,11 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  * When you press the "user" button, the process A again prints the value of the "localVariable"
  *
  * What value does it have when you run the program a) before the button sensor event and b) after ? why is it like this? explain.
- *
+ * ANSWER: The answer for both is 100. Because when it was initialized, it was 100.
+ *         Considering it's a static variable, its value would not change.
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
- *
+ *ANSWER: Declare it as a static variable.
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
  * Let it start at boot time. Observe what happens.
@@ -95,3 +97,6 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  * Find a solution to let C use the CPU while A and B are still being served. Check your final code with a Cooja simulator.
  *
  */
+/*
+ANSWER: The current code is the altered program.
+*/
