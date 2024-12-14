@@ -2,7 +2,7 @@
 <simconf version="2023090101">
   <simulation>
     <title>My simulation</title>
-    <speedlimit>1.0</speedlimit>
+    <speedlimit>20.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -39,7 +39,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="95.26757944884845" y="26.843210237737768" />
+          <pos x="17.9074993075908" y="6.960943608574355" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.contikimote.interfaces.ContikiMoteID
@@ -56,9 +56,9 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 107.39310959195595 148.5970816020566</viewport>
+      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 177.72045517491745 166.6718694467506</viewport>
     </plugin_config>
-    <bounds x="1" y="1" height="400" width="400" />
+    <bounds x="1" y="1" height="400" width="400" z="1" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.LogListener
@@ -67,7 +67,7 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <bounds x="400" y="160" height="240" width="412" z="1" />
+    <bounds x="400" y="160" height="240" width="754" z="4" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.TimeLine
@@ -78,7 +78,7 @@
       <showLEDs />
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
-    <bounds x="0" y="471" height="166" width="812" z="3" />
+    <bounds x="0" y="471" height="166" width="1154" z="3" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Notes
@@ -86,6 +86,15 @@
       <notes>Enter notes here</notes>
       <decorations>true</decorations>
     </plugin_config>
-    <bounds x="400" y="0" height="160" width="412" z="2" />
+    <bounds x="400" y="0" height="160" width="754" z="2" />
+  </plugin>
+  <plugin>
+    org.contikios.cooja.plugins.MoteInterfaceViewer
+    <mote_arg>0</mote_arg>
+    <plugin_config>
+      <interface>LEDs</interface>
+      <scrollpos>0,0</scrollpos>
+    </plugin_config>
+    <bounds x="0" y="0" height="300" width="350" />
   </plugin>
 </simconf>
