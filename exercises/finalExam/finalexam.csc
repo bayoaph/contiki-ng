@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simconf version="2023090101">
   <simulation>
-    <title>finalExam</title>
+    <title>My simulation</title>
     <speedlimit>20.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
@@ -35,7 +35,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="89.97042494401623" y="43.020982719335386" />
+          <pos x="44.34818376232034" y="19.129680524768823" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -45,7 +45,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="72.07307604513937" y="47.11047261394343" />
+          <pos x="54.39149413564845" y="54.62200799258435" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -55,7 +55,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="39.78465286895096" y="62.23672917089505" />
+          <pos x="1.450647072188782" y="16.430013592989624" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -65,7 +65,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="49.04133929738635" y="69.81810100550271" />
+          <pos x="45.56783235532593" y="49.59598674359287" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -75,7 +75,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="79.08850565301323" y="69.26608928823349" />
+          <pos x="21.02742363919001" y="59.4708215172996" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -85,7 +85,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="42.49908815466316" y="48.09217152689252" />
+          <pos x="10.372184449701315" y="51.775010890796736" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -95,7 +95,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="55.554410290149896" y="36.57865806606401" />
+          <pos x="55.61666888091462" y="41.05592401805108" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -105,7 +105,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="43.8433452335282" y="30.962133422785907" />
+          <pos x="37.54775757872333" y="14.034668158737206" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -115,7 +115,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="48.55952949698732" y="38.69066790913658" />
+          <pos x="36.892673263996464" y="35.1044911321016" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -125,7 +125,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="73.40390698777131" y="67.16519671868943" />
+          <pos x="36.58240303698228" y="55.885402300003996" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -153,7 +153,7 @@
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="58.879890129489944" y="56.26087166172134" />
+          <pos x="21.058307252214277" y="37.94938005886733" />
         </interface_config>
         <interface_config>
           org.contikios.cooja.mspmote.interfaces.MspMoteID
@@ -170,9 +170,9 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>2.0001383250185074 0.0 0.0 2.0001383250185074 104.75916437363784 77.18905510074897</viewport>
+      <viewport>1.7156933457862498 0.0 0.0 1.7156933457862498 107.31824047389784 97.30158493338996</viewport>
     </plugin_config>
-    <bounds x="1" y="1" height="400" width="400" />
+    <bounds x="1" y="1" height="400" width="400" z="1" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.LogListener
@@ -181,7 +181,7 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <bounds x="400" y="160" height="589" width="1308" z="1" />
+    <bounds x="400" y="160" height="559" width="1308" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.TimeLine
@@ -219,6 +219,6 @@
       <interface>Leds</interface>
       <scrollpos>0,0</scrollpos>
     </plugin_config>
-    <bounds x="15" y="437" height="300" width="350" z="2" />
+    <bounds x="40" y="444" height="300" width="350" z="2" />
   </plugin>
 </simconf>

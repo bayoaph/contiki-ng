@@ -6,15 +6,13 @@
 
 #define UDP_PORT 1234
 
-// Custom structure for temperature data
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     uint16_t temp_value; // Temperature in hundredths of a degree
 } TempMsg;
 
 static struct simple_udp_connection udp_connection;
 static int led_state_index = 0;
 
-// Function to control LED states based on the current index
 static void update_led_state(int index) {
     switch (index % 3) {
     case 0:
@@ -32,11 +30,8 @@ static void update_led_state(int index) {
     }
 }
 
-// Function to interpret and display temperature data
 static void display_temperature(const TempMsg *msg) {
-    int16_t raw_temp = msg->temp_value;
-
-    // Break temperature into whole and fractional parts
+    int16_t raw_temp = uip_ntohs(msg->temp_value);
     int whole_part = raw_temp / 100;
     int frac_part = raw_temp % 100;
 
@@ -44,11 +39,9 @@ static void display_temperature(const TempMsg *msg) {
         frac_part = -frac_part;
     }
 
-    // Display the temperature in a readable format
     printf("Received Temperature: %d.%02d°C\n", whole_part, frac_part);
 }
 
-// Callback for handling incoming UDP packets
 static void udp_message_handler(struct simple_udp_connection *conn,
                                  const uip_ipaddr_t *sender,
                                  uint16_t sender_port,
@@ -61,11 +54,9 @@ static void udp_message_handler(struct simple_udp_connection *conn,
         return;
     }
 
-    // Decode the received temperature message
     TempMsg received_msg;
     memcpy(&received_msg, data, sizeof(received_msg));
 
-    // Update LED state and process the temperature data
     led_state_index++;
     update_led_state(led_state_index);
     display_temperature(&received_msg);
@@ -77,7 +68,6 @@ AUTOSTART_PROCESSES(&sink_station_process);
 PROCESS_THREAD(sink_station_process, ev, data) {
     PROCESS_BEGIN();
 
-    // Configure UDP connection
     simple_udp_register(&udp_connection, UDP_PORT, NULL, UDP_PORT, udp_message_handler);
     printf("Sink Station active, awaiting messages on port %d\n", UDP_PORT);
 
