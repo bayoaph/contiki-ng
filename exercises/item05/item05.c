@@ -18,16 +18,17 @@ PROCESS_THREAD(A_PROCESS, ev, data)
 
   etimer_set(&et, CLOCK_SECOND * 10);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-  static uint16_t localVariable = 100;
+  static const uint16_t localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", (void*)&localVariable);
+
 
   SENSORS_ACTIVATE(button_sensor);
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", &localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
@@ -45,7 +46,7 @@ PROCESS_THREAD(B_PROCESS, ev, data)
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    printf("B: %u (address=%p)\n", randomNum, &randomNum);
   }
   PROCESS_END();
 }
@@ -56,20 +57,33 @@ PROCESS(C_PROCESS, "C");
 PROCESS_THREAD(C_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
+  static struct etimer et;
   static uint16_t inc;
+
+  // Set the timer to expire every 2 seconds
+  etimer_set(&et, 2 * CLOCK_SECOND);
+
   while (1)
   {
-    if (inc % 10000 == 0)
-      printf("C: i %u\n", inc);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    
+    // Print the counter value every 2 seconds
+    printf("C: i %u\n", inc);
     inc++;
-    // Temporarily give the processor to another protothread
-    PROCESS_PAUSE();
+
+    // Reset the timer
+    etimer_reset(&et);
+
+    PROCESS_PAUSE();  // Allow the scheduler to give time to other processes
   }
+
   PROCESS_END();
 }
-
 AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
 
+/*
+  *This is ran in SKYMOTE since the button sensor wont work in the COOJAMOTE.
+*/
 /* Exercise 5 (to be solved with ILIAS):
  *
  * a) In the process A, a variable "localVariable" is declared and printed out 10s after
@@ -80,10 +94,22 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  * When you press the "user" button, the process A again prints the value of the "localVariable"
  *
  * What value does it have when you run the program a) before the button sensor event and b) after ? why is it like this? explain.
- *
+ 
+  *a) 100 
+  *b) 100
+  ANSWER:
+  In process A, localVariable was initialized to 100 and printed 10 seconds after booting. 
+  Before the button event, it retained its value as expected. 
+  However, after the button event, its value remained unchanged because localVariable was declared locally. 
+  Every time we click the button, 100 is printed.
+
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
- *
+  *ANSWER:
+  Turn the varivable into a constant so that no process can affect it
+  static const uint16_t localVariable = 100;
+
+
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
  * Let it start at boot time. Observe what happens.
@@ -93,5 +119,34 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  * As a programmer, you can solve such tasks in separate protothreads, while still being able to serve other protothreads.
  *
  * Find a solution to let C use the CPU while A and B are still being served. Check your final code with a Cooja simulator.
- *
+ * ANSWER:
+  Introduce a timer  
+  By introducing a timer, you can periodically pause C_PROCESS and allow the scheduler to switch to other processes. 
+  The added or modified code below lets the process wait before proceeding. It let it wait for 2 seconds.
+
+  PPROCESS_THREAD(C_PROCESS, ev, data)
+ {
+  PROCESS_BEGIN();
+  static struct etimer et;
+  static uint16_t inc;
+
+  // Set the timer to expire every 2 seconds
+  etimer_set(&et, 2 * CLOCK_SECOND);
+
+  while (1)
+  {
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    
+    // Print the counter value every 2 seconds
+    printf("C: i %u\n", inc);
+    inc++;
+
+    // Reset the timer
+    etimer_reset(&et);
+
+    PROCESS_PAUSE();  // Allow the scheduler to give time to other processes
+  }
+
+  PROCESS_END();
+ }
  */
