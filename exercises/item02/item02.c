@@ -55,6 +55,7 @@ AUTOSTART_PROCESSES(&button_press_process);
  * the serial interface
 
 Answer:
+Instead of the zoul-sensors, I have used the sht11 sensors as it is th one available in my device. 
 Everytime the button is clicked, it prints an output of the temperature of  6.306 C
  */
 
