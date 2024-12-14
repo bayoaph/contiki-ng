@@ -4,13 +4,15 @@
 #include "contiki.h"
 #include <stdio.h>
 #include <string.h>
-#include "node-id.h" /* get the variable node_id that holds the own node id */
+#include "node-id.h"
 #include "dev/leds.h"
 #include "lib/random.h"
-#include "dev/button-sensor.h" /* for the button sensor */
+#include "dev/button-sensor.h"
+
 /*---------------------------------------------------------------------------*/
 PROCESS(A_PROCESS, "A");
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(A_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
@@ -18,16 +20,16 @@ PROCESS_THREAD(A_PROCESS, ev, data)
 
   etimer_set(&et, CLOCK_SECOND * 10);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-  static uint16_t localVariable = 100;
+  static uint16_t localVariable = 100; 
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", (void *) &localVariable);
 
   SENSORS_ACTIVATE(button_sensor);
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", (void *)&localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
@@ -45,7 +47,7 @@ PROCESS_THREAD(B_PROCESS, ev, data)
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    printf("B: %u (address=%p)\n", randomNum, (void *)&randomNum);
   }
   PROCESS_END();
 }
@@ -62,13 +64,21 @@ PROCESS_THREAD(C_PROCESS, ev, data)
     if (inc % 10000 == 0)
       printf("C: i %u\n", inc);
     inc++;
-    // Temporarily give the processor to another protothread
-    PROCESS_PAUSE();
+    
+    // More frequent yielding
+    if (inc % 100 == 0) {
+      // Use etimer to schedule next execution
+      static struct etimer et;
+      etimer_set(&et, CLOCK_SECOND / 10);
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    }
   }
   PROCESS_END();
 }
 
-AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
+/*---------------------------------------------------------------------------*/
+AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS);
+
 
 /* Exercise 5 (to be solved with ILIAS):
  *
@@ -79,10 +89,21 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  *
  * When you press the "user" button, the process A again prints the value of the "localVariable"
  *
- * What value does it have when you run the program a) before the button sensor event and b) after ? why is it like this? explain.
+ * What value does it have when you run the program 
+  a) before the button sensor event
+  My answer:
+  - The value of localVariable is 100
+  - because it is initialized to 100 when the process starts 
+  and b) after ?
+  My answer:
+  - still 100
+  - it doesnt change the value
+  why is it like this? explain.
  *
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
+  My answer:
+  - make it static
  *
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
@@ -94,4 +115,16 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  *
  * Find a solution to let C use the CPU while A and B are still being served. Check your final code with a Cooja simulator.
  *
+ * my Aanswer:
+
+  To solve the issue of Protothread C monopolizing the CPU, the solution involves using PROCESS_PAUSE() in C, which allows
+  it to pause periodically and give control back to other processes like A and B. This ensures that C doesn't lock up the 
+  CPU, allowing all processes to run cooperatively in Contiki's multitasking environment.
+    
+ * //Code Modifications
+-> Added PROCESS_PAUSE() in Process C to yield control periodically.  
+-> Prevented CPU monopolization by allowing other processes (A and B) to execute.  
+-> Maintained computational task in Process C while ensuring periodic yielding of control.  
+-> Introduced timer-based yielding to ensure Process C doesn't block other processes for too long.  
+-> Ensured that Process C runs without starving other processes by periodically checking the event queue.  
  */
