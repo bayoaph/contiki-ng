@@ -175,9 +175,9 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>2.702085360967431 0.0 0.0 2.702085360967431 70.99881728704224 40.767995572860016</viewport>
+      <viewport>6.723653045402476 0.0 0.0 6.723653045402476 -191.85030296830692 -238.35458125614093</viewport>
     </plugin_config>
-    <bounds x="1" y="1" height="400" width="400" />
+    <bounds x="1" y="1" height="400" width="400" z="1" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.LogListener
@@ -224,6 +224,6 @@
       <interface>Leds</interface>
       <scrollpos>0,0</scrollpos>
     </plugin_config>
-    <bounds x="366" y="398" height="300" width="350" z="1" />
+    <bounds x="366" y="398" height="300" width="350" />
   </plugin>
 </simconf>
