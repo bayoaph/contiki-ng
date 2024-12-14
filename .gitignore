@@ -9,4 +9,14 @@ obj_zoul/
 # Workspaces
 macabilo.code-workspace
 
-main_contiki/
+#Main-contiki
+_setup/
+
+#Gitignore
+.gitignore
+
+#Makefiles
+exercises/item01/Makefile
+exercises/item02/Makefile
+exercises/item03/Makefile
+
