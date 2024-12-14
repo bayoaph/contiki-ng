@@ -1,143 +1,179 @@
 
 #include "contiki.h"
-#include "net/rime.h"
+//#include "net/rime.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
-#include "node-id.h"
-#include "sys/rtimer.h"
+#include "sys/node-id.h" //added sys
+//#include "sys/rtimer.h"
+#include "net/ipv6/simple-udp.h" //replaced rime
+#include "net/linkaddr.h"
 #include <stdio.h>
+#include "net/ipv6/uip-debug.h"
 
-struct timeMessage
-{
-  clock_time_t time;
-  unsigned short originator;
-};
 
-/* two timeMessage struct declaration/instantiations */
-static struct timeMessage tmReceived;
-static struct timeMessage tmSent;
 
-void print_temperature_binary_to_float(uint16_t temp)
-{
-  printf("%d.%d", (temp / 10 - 396) / 10, (temp / 10 - 396) % 10);
+
+#define UDP_PORT 1234
+
+
+// define message structure using typedef for clarity
+typedef struct {
+  clock_time_t timestamp; // time of message creation
+  unsigned short sender_id; // id of the node sending the message
+} time_message_t;
+
+
+// declare udp connection and led off timer
+static struct simple_udp_connection udp_conn;
+static struct ctimer leds_off_timer;
+
+
+// declare variables for received and sent time messages
+static time_message_t tmReceived;
+static time_message_t tmSent;
+
+
+// function to turn off the green led after a short time
+static void turn_off_leds_callback() {
+  leds_off(LEDS_GREEN);
 }
 
-static struct ctimer leds_off_timer_send;
 
-/* Timer callback turns off the blue led */
-static void timerCallback_turnOffLeds()
-{
-  leds_off(LEDS_BLUE);
-}
+// function to calculate the neighbor's ipv6 address based on node id
+static void generate_ipv6_address_for_neighbor(uip_ipaddr_t *addr, uint16_t node_id) {
+  linkaddr_t target_linkaddr;
 
-/*---------------------------------------------------------------------------*/
-PROCESS(example_unicast_process, "RTT using Rime Unicast Primitive");
-AUTOSTART_PROCESSES(&example_unicast_process);
-/*---------------------------------------------------------------------------*/
 
-static void recv_uc(struct unicast_conn *c, const rimeaddr_t *from);
-static const struct unicast_callbacks unicast_callbacks = {recv_uc};
-static struct unicast_conn uc;
-
-/* specify the address of the unicast */
-static rimeaddr_t addr;
-
-/* this function has been defined to be called when a unicast is being received */
-static void recv_uc(struct unicast_conn *c, const rimeaddr_t *from)
-{
-  // Round-trip time, will be decremented later
-  clock_time_t rtt = clock_time();
-
-  printf("unicast message received from %d.%d\n", from->u8[0], from->u8[1]);
-  /* turn on blue led */
-  leds_on(LEDS_BLUE);
-  /* set the timer "leds_off_timer" to 1/8 second */
-  ctimer_set(&leds_off_timer_send, CLOCK_SECOND / 8, timerCallback_turnOffLeds, NULL);
-
-  /* from the packet we have just received, read the data and write it into the
-   * struct tmReceived we have declared and instantiated above (line 16)
-   */
-  packetbuf_copyto(&tmReceived);
-
-  /* print the contents of the received packet */
-  printf("time received = %d clock ticks", (uint16_t)tmReceived.time);
-  printf(" = %d secs ", (uint16_t)tmReceived.time / CLOCK_SECOND);
-  printf("%d millis ", (1000L * ((uint16_t)tmReceived.time % CLOCK_SECOND)) / CLOCK_SECOND);
-  printf("originator = %d\n", tmReceived.originator);
-
-  // If the packet received is not ours, send it back to the originator
-  if (tmReceived.originator != node_id)
-  {
-    packetbuf_copyfrom(&tmReceived, sizeof(tmSent));
-
-    if (!rimeaddr_cmp(&addr, &rimeaddr_node_addr))
-    {
-      /* when calling unicast_send, we have to specify the address as the second argument (a pointer to the defined rimeaddr_t struct) */
-      unicast_send(&uc, &addr);
-    }
-    printf("sending packet to %u\n", addr.u8[0]);
+  // modify link address depending on whether node id is odd or even
+  if (node_id % 2 == 0) {
+    target_linkaddr.u8[0] = linkaddr_node_addr.u8[0];
+    target_linkaddr.u8[1] = linkaddr_node_addr.u8[1] + 1;
+    target_linkaddr.u8[2] = linkaddr_node_addr.u8[2];
+    target_linkaddr.u8[3] = linkaddr_node_addr.u8[3] - 1;
+    target_linkaddr.u8[4] = linkaddr_node_addr.u8[4];
+    target_linkaddr.u8[5] = linkaddr_node_addr.u8[5] - 1;
+    target_linkaddr.u8[6] = linkaddr_node_addr.u8[6] - 1;
+    target_linkaddr.u8[7] = linkaddr_node_addr.u8[7] - 1;
+  } else {
+    target_linkaddr.u8[0] = linkaddr_node_addr.u8[0];
+    target_linkaddr.u8[1] = linkaddr_node_addr.u8[1] - 1;
+    target_linkaddr.u8[2] = linkaddr_node_addr.u8[2];
+    target_linkaddr.u8[3] = linkaddr_node_addr.u8[3] + 1;
+    target_linkaddr.u8[4] = linkaddr_node_addr.u8[4];
+    target_linkaddr.u8[5] = linkaddr_node_addr.u8[5] + 1;
+    target_linkaddr.u8[6] = linkaddr_node_addr.u8[6] + 1;
+    target_linkaddr.u8[7] = linkaddr_node_addr.u8[7] + 1;
   }
-  else
-  { // Our packet has completed a round-trip
-    rtt -= tmReceived.time;
-    printf("RTT = %d ms\n", (1000L * ((uint16_t)rtt % CLOCK_SECOND)) / CLOCK_SECOND);
+
+
+  // create ipv6 address using modified link address
+  uip_ip6addr(addr, 0xfe80, 0, 0, 0, 0x212,
+              (target_linkaddr.u8[2] << 8) | target_linkaddr.u8[3],
+              (target_linkaddr.u8[4] << 8) | target_linkaddr.u8[5],
+              (target_linkaddr.u8[6] << 8) | target_linkaddr.u8[7]);
+}
+
+
+// callback function to process received udp packets
+static void process_received_udp_packet(struct simple_udp_connection *conn,
+                                         const uip_ipaddr_t *sender_addr,
+                                         uint16_t sender_port,
+                                         const uip_ipaddr_t *receiver_addr,
+                                         uint16_t receiver_port,
+                                         const uint8_t *data,
+                                         uint16_t datalen) {
+  clock_time_t rtt = clock_time(); // round-trip time calculation
+
+
+  printf("received message from ");
+  uip_debug_ipaddr_print(sender_addr);
+  printf("\n");
+
+
+  // turn on the green led when message is received
+  leds_on(LEDS_GREEN);
+
+
+  // set timer to turn off the green led after a brief period
+  ctimer_set(&leds_off_timer, CLOCK_SECOND / 8, turn_off_leds_callback, NULL);
+
+
+  // copy received data into the tmreceived variable
+  memcpy(&tmReceived, data, sizeof(tmReceived));
+
+
+  // print the details of the received message
+  printf("time received = %lu clock ticks", (unsigned long)tmReceived.timestamp);
+  printf(" = %lu secs ", (unsigned long)tmReceived.timestamp / CLOCK_SECOND);
+  printf("%lu millis ", (1000L * ((unsigned long)tmReceived.timestamp % CLOCK_SECOND)) / CLOCK_SECOND);
+  printf("sender id = %d\n", tmReceived.sender_id);
+
+
+  if (tmReceived.sender_id != node_id) {
+    // echo the message back to the sender
+    simple_udp_sendto(&udp_conn, &tmReceived, sizeof(tmReceived), sender_addr);
+    printf("echoing message back to sender.\n");
+  } else {
+    // calculate round-trip time (rtt)
+    rtt -= tmReceived.timestamp;
+    printf("round-trip time (rtt) = %lu ms\n", (1000L * ((unsigned long)rtt % CLOCK_SECOND)) / CLOCK_SECOND);
   }
 }
 
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(example_unicast_process, ev, data)
-{
-  PROCESS_EXITHANDLER(unicast_close(&uc);)
+
+// define the main process to handle unicast messages and time tracking
+PROCESS(unicast_rtt_process, "unicast rtt process using simple udp");
+AUTOSTART_PROCESSES(&unicast_rtt_process);
+
+
+PROCESS_THREAD(unicast_rtt_process, ev, data) {
+  static uip_ipaddr_t neighbor_ipaddr;
+
 
   PROCESS_BEGIN();
 
-  unicast_open(&uc, 146, &unicast_callbacks);
 
+  // register udp connection for communication
+  simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, process_received_udp_packet);
+
+
+  // activate the button sensor
   SENSORS_ACTIVATE(button_sensor);
 
-  // Store the partner node address permanently in addr.
-  /* in case I am node 50, choose 51 as destination.*/
-  if (node_id % 2 == 0)
-  {
-    addr.u8[0] = node_id + 1;
-  }
-  /* In case I am node 51, choose 50, etc */
-  else
-  {
-    addr.u8[0] = node_id - 1;
-  }
-  addr.u8[1] = 0;
 
-  while (1)
-  {
+  while (1) {
+    // wait for the button press event
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-    /* when the button is pressed, read the current time and write it to the
-     * previously declared tmSent struct */
-    tmSent.time = clock_time();
-    /* write the id of then node where the button is pressed into the packet */
-    tmSent.originator = node_id;
 
-    /* prepare the unicast packet to be sent. Write the contents of the struct, where we
-     * have just written the time and the id into, to the packet we intend to send
-     */
-    packetbuf_copyfrom(&tmSent, sizeof(tmSent));
+    // prepare the message with the current time and sender's node id
+    tmSent.timestamp = clock_time();
+    tmSent.sender_id = node_id;
 
-    if (!rimeaddr_cmp(&addr, &rimeaddr_node_addr))
-    {
-      /* when calling unicast_send, we have to specify the address as the second argument (a pointer to the defined rimeaddr_t struct) */
-      unicast_send(&uc, &addr);
-    }
-    printf("sending packet to %u\n", addr.u8[0]);
+
+    // generate the neighbor's ipv6 address based on the node id
+    generate_ipv6_address_for_neighbor(&neighbor_ipaddr, node_id);
+
+
+    // send the message as a unicast udp packet
+    simple_udp_sendto(&udp_conn, &tmSent, sizeof(tmSent), &neighbor_ipaddr);
+    printf("node id: %d, sending message to ", node_id);
+    uip_debug_ipaddr_print(&neighbor_ipaddr);
+    printf("\n");
   }
 
+
+  // deactivate the button sensor after use
   SENSORS_DEACTIVATE(button_sensor);
+
 
   PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
 
 /* Exercise 4
+
  *
  * Compile and flash the above code to your Cooja simulator. Read and understand the code. Check
  * the contiki documentation for the unicast primitive and understand how the mechanism
