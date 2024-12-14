@@ -16,33 +16,29 @@
       <logoutput>40000</logoutput>
     </events>
     <motetype>
-      org.contikios.cooja.contikimote.ContikiMoteType
-      <description>Cooja Mote Type #1</description>
-      <source>[CONFIG_DIR]/item01.c</source>
-      <commands>$(MAKE) -j$(CPUS) item01.cooja TARGET=cooja</commands>
+      org.contikios.cooja.mspmote.Z1MoteType
+      <description>Z1 Mote Type #1</description>
+      <source>[CONFIG_DIR]/item02.c</source>
+      <commands>$(MAKE) -j$(CPUS) item02.z1 TARGET=z1</commands>
+      <firmware>[CONFIG_DIR]/build/z1/item02.z1</firmware>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
-      <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiVib</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiMoteID</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiRS232</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiBeeper</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.IPAddress</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiRadio</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiButton</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiPIR</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiClock</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiLED</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiCFS</moteinterface>
-      <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiEEPROM</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Mote2MoteRelations</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.MoteAttributes</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.MspClock</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.MspMoteID</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.MspButton</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.Msp802154Radio</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.MspDefaultSerial</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.MspLED</moteinterface>
+      <moteinterface>org.contikios.cooja.mspmote.interfaces.MspDebugOutput</moteinterface>
       <mote>
         <interface_config>
           org.contikios.cooja.interfaces.Position
-          <pos x="95.26757944884845" y="26.843210237737768" />
+          <pos x="0.1282259638617056" y="5.281237205455557" />
         </interface_config>
         <interface_config>
-          org.contikios.cooja.contikimote.interfaces.ContikiMoteID
+          org.contikios.cooja.mspmote.interfaces.MspMoteID
           <id>1</id>
         </interface_config>
       </mote>
@@ -56,7 +52,7 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 107.39310959195595 148.5970816020566</viewport>
+      <viewport>0.9090909090909091 0.0 0.0 0.9090909090909091 193.8834309419439 168.19887526776768</viewport>
     </plugin_config>
     <bounds x="1" y="1" height="400" width="400" />
   </plugin>
@@ -67,7 +63,7 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <bounds x="400" y="160" height="240" width="412" z="1" />
+    <bounds x="400" y="160" height="240" width="1308" z="4" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.TimeLine
@@ -78,7 +74,7 @@
       <showLEDs />
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
-    <bounds x="0" y="471" height="166" width="812" z="3" />
+    <bounds x="0" y="891" height="166" width="1708" z="3" />
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Notes
@@ -86,6 +82,15 @@
       <notes>Enter notes here</notes>
       <decorations>true</decorations>
     </plugin_config>
-    <bounds x="400" y="0" height="160" width="412" z="2" />
+    <bounds x="400" y="0" height="160" width="1308" z="2" />
+  </plugin>
+  <plugin>
+    org.contikios.cooja.plugins.MoteInterfaceViewer
+    <mote_arg>0</mote_arg>
+    <plugin_config>
+      <interface>Leds</interface>
+      <scrollpos>0,0</scrollpos>
+    </plugin_config>
+    <bounds x="49" y="440" height="300" width="350" z="1" />
   </plugin>
 </simconf>
