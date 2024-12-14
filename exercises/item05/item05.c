@@ -18,16 +18,16 @@ PROCESS_THREAD(A_PROCESS, ev, data)
 
   etimer_set(&et, CLOCK_SECOND * 10);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-  static uint16_t localVariable = 100;
+  static unsigned localVariable = 100;
   printf("A: ATTENTION: localVariable = %u", localVariable);
-  printf(" (address=%u)\n", &localVariable);
+  printf(" (address=%p)\n", (void*) &localVariable);
 
   SENSORS_ACTIVATE(button_sensor);
   while (1)
   {
     PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
     printf("A: ATTENTION: localVariable = %u", localVariable);
-    printf(" (address=%u)\n", &localVariable);
+    printf(" (address=%p)\n", (void*) &localVariable);
   }
   SENSORS_DEACTIVATE(button_sensor);
   PROCESS_END();
@@ -44,8 +44,8 @@ PROCESS_THREAD(B_PROCESS, ev, data)
   {
     etimer_set(&et, CLOCK_SECOND / 2);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    uint16_t randomNum = random_rand();
-    printf("B: %u (address=%u)\n", randomNum, &randomNum);
+    unsigned randomNum = random_rand();
+    printf("B: %u (address=%p)\n", randomNum, (void *) &randomNum);
   }
   PROCESS_END();
 }
@@ -56,14 +56,19 @@ PROCESS(C_PROCESS, "C");
 PROCESS_THREAD(C_PROCESS, ev, data)
 {
   PROCESS_BEGIN();
-  static uint16_t inc;
+  static unsigned inc;
+  static struct etimer et;
+
   while (1)
   {
     if (inc % 10000 == 0)
       printf("C: i %u\n", inc);
     inc++;
-    // Temporarily give the processor to another protothread
-    PROCESS_PAUSE();
+
+    // Add delay to allow other processes to run
+    etimer_set(&et, CLOCK_SECOND / 100); 
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et)); 
+
   }
   PROCESS_END();
 }
@@ -83,6 +88,13 @@ AUTOSTART_PROCESSES(&A_PROCESS, &B_PROCESS, &C_PROCESS); // autostart processes
  *
  * What do you have to do in order to make sure that the value of the variable "localVariable" is
  * always 100?
+ * 
+ * ANSWER:
+ * The localVariable is declared as static and initialized to 100 in process A. 
+ * Before button event, it prints 100 because static makes sure that it's initialized once and retains its value.
+ * Furthermore, after the button event, the value is still 100 since the code does not modify it.
+ * 
+ * Ensuring localVariable, declaring it as static const is recommended to avoid accidental changesS
  *
  * b) Protothread C is a computationally intensive task. It is already defined in the code above but not yet used.
  *
