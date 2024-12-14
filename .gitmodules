@@ -1,3 +1,4 @@
 [submodule "main_contiki"]
 	path = main_contiki
 	url = https://github.com/contiki-ng/contiki-ng.git
+	branch = origin/master

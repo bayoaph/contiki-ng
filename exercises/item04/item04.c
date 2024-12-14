@@ -1,3 +1,4 @@
+
 #include "contiki.h"
 #include "net/ipv6/simple-udp.h"
 #include "net/ipv6/uiplib.h"
@@ -11,11 +12,13 @@
 #define UDP_PORT 1234
 #define BROADCAST_ADDR "ff02::1"
 
+
 struct timeMessage
 {
   clock_time_t time;
   unsigned short originator;
 };
+
 
 static struct simple_udp_connection udp_conn;
 
@@ -39,7 +42,6 @@ static void timerCallback_turnOffLeds()
 /*---------------------------------------------------------------------------*/
 PROCESS(example_unicast_process, "RTT using Rime Unicast Primitive");
 AUTOSTART_PROCESSES(&example_unicast_process);
-/*---------------------------------------------------------------------------*/
 
 // static void recv_uc(struct unicast_conn *c, const rimeaddr_t *from);
 // static const struct unicast_callbacks unicast_callbacks = {recv_uc};
@@ -65,6 +67,7 @@ static void udp_recv_callback(struct simple_udp_connection *c,
 
   /* turn on blue led */
   leds_on(LEDS_YELLOW);
+
   /* set the timer "leds_off_timer" to 1/8 second */
   ctimer_set(&leds_off_timer_send, CLOCK_SECOND / 8, timerCallback_turnOffLeds, NULL);
 
@@ -79,7 +82,6 @@ static void udp_recv_callback(struct simple_udp_connection *c,
   printf(" = %lu secs ", (uint16_t)tmReceived.time / CLOCK_SECOND);
   printf("%lu millis ", (1000L * ((uint16_t)tmReceived.time % CLOCK_SECOND)) / CLOCK_SECOND);
   printf(" originator = %d\n", tmReceived.originator);
-
 
   // If the packet received is not ours, send it back to the originator
   if (tmReceived.originator != node_id)
@@ -113,7 +115,6 @@ PROCESS_THREAD(example_unicast_process, ev, data)
   PROCESS_BEGIN();
 
   simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback);
-
 
   SENSORS_ACTIVATE(button_sensor);
 

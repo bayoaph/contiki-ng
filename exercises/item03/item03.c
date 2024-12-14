@@ -1,4 +1,5 @@
-/* Based on exercises by Philipp Hurni, University of Bern, December 2013 */
+/* Philipp Hurni, University of Bern, December 2013     */
+/* Modified for Zolertia Firefly and Contiki-NG - M. Cabilo, Apr 2019  */
 
 #include "contiki.h"
 #include <stdio.h>
@@ -12,15 +13,14 @@
 
 #define UDP_PORT 1234
 #define BROADCAST_ADDR "ff02::1"
-
 struct temperatureMessage
 {
   char messageString[50];
   uint16_t temperature;
 };
 
-static struct simple_udp_connection udp_conn;
-static struct ctimer leds_off_timer_send;
+#define UDP_PORT 1234
+#define SEND_INTERVAL (10 * CLOCK_SECOND) // Interval to send broadcast message
 
 /* Timer callback to turn off the blue LED */
 static void timerCallback_turnOffLeds()
@@ -73,7 +73,6 @@ static struct etimer et;
 static struct temperatureMessage tm;
 /*---------------------------------------------------------------------------*/
 PROCESS(broadcast_rssi_process, "Broadcast RSSI");
-AUTOSTART_PROCESSES(&broadcast_rssi_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(broadcast_rssi_process, ev, data)
 {
@@ -81,7 +80,6 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
 
   printf("Starting broadcast\n");
   simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_recv_callback);
-
   /* Broadcast every 4 seconds */
   etimer_set(&et, 4 * CLOCK_SECOND);
 
@@ -104,7 +102,7 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
 
     /* Send the packet */
     send_broadcast_packet(&tm);
-
+    
     /* Turn on the green LED to indicate a message was sent */
     leds_on(LEDS_GREEN);
     ctimer_set(&leds_off_timer_send, CLOCK_SECOND, timerCallback_turnOffLeds, NULL);
@@ -114,7 +112,6 @@ PROCESS_THREAD(broadcast_rssi_process, ev, data)
 
   PROCESS_END();
 }
-
 /* Exercise 3a: Flash the program to your nodes and observe the behavior. 
  * The nodes with a temperature sensor should send their temperature. 
  * Nodes without a sensor send a message indicating this. 

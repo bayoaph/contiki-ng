@@ -71,7 +71,8 @@ AUTOSTART_PROCESSES(&led_blink_process, &hello_world_process);
 /* Exercise 1b: uncomment the three lines with the timer, compile and flash it to the sensor.
  * Observe what happens
  */
-// The yellow LED on the node blinks in a pattern where it turns on for 1 second then turns off for 3 seconds.
+
+// The yellow LED on the node blinks in a pattern where it turns on for 1 second then turns off for 3 seco
 
 /* Exercise 1c: alter the program such that the node prints "Hello World" infinitely to the screen,
  * with the delay of 4 seconds in between each statement
