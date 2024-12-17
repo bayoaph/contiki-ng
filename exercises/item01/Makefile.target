@@ -1,1 +1,4 @@
-TARGET=native
+TARGET=zoul
+BOARD=firefly
+PORT=/dev/ttyUSB0
+
